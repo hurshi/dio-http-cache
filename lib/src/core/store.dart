@@ -70,14 +70,15 @@ class DiskCacheStore extends BaseCacheStore {
 
   @override
   setCacheObj(CacheObj obj) async {
+    var content = obj.content;
     if (null != config.encrypt)
-      obj.content = await config.encrypt(obj.content);
+      content = await config.encrypt(content);
     else
-      obj.content = base64.encode(utf8.encode(obj.content));
+      content = base64.encode(utf8.encode(content));
 
     _database.then((db) => db.execute(
         "REPLACE INTO $tableCacheObject($columnKey,$columnSubKey,$columnMaxAgeDate,$columnMaxStaleDate,$columnContent)"
-        " values(\"${obj.key}\",\"${obj.subKey ?? ""}\",${obj.maxAgeDate ?? 0},${obj.maxStaleDate ?? 0},\"${obj.content}\")"));
+        " values(\"${obj.key}\",\"${obj.subKey ?? ""}\",${obj.maxAgeDate ?? 0},${obj.maxStaleDate ?? 0},\"${content}\")"));
   }
 
   @override
