@@ -1,7 +1,5 @@
 library dio_cache;
 
-/// A Calculator.
-class Calculator {
-  /// Returns [value] plus 1.
-  int addOne(int value) => value + 1;
-}
+export 'src/builder_dio.dart';
+export 'src/core/config.dart';
+export 'src/manager_dio.dart';

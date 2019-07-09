@@ -7,7 +7,6 @@
    2. subKey : params
 2. Flags :
    1. end time
-   2. UseExpiredDataIfNetError
 3. Remove by:
    1. key
    2. key + subKey
