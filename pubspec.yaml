@@ -11,12 +11,16 @@ dependencies:
   flutter:
     sdk: flutter
 
-  sqflite: ^1.1.6
   quiver: '>=2.0.0 <3.0.0'
   path: ^1.6.2
   json_serializable: ^3.0.0
   dio: 2.1.10
 
+  sqflite:
+    git:
+      url: https://github.com/hurshi/sqflite
+      path: sqflite
+#  sqflite: ^1.1.6
 
 dev_dependencies:
   flutter_test:

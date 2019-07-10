@@ -19,7 +19,8 @@ class DioCacheManager {
 
   get interceptor {
     if (null == _interceptor) {
-      _interceptor = InterceptorsWrapper(onRequest: _onRequest, onResponse: _onResponse, onError: _onError);
+      _interceptor = InterceptorsWrapper(
+          onRequest: _onRequest, onResponse: _onResponse, onError: _onError);
     }
     return _interceptor;
   }
@@ -27,7 +28,8 @@ class DioCacheManager {
   _onRequest(RequestOptions options) async {
     if (options.extra.containsKey(DIO_CACHE_KEY_MAX_AGE)) {
       var responseDataFromCache = await _pullFromCacheBeforeMaxAge(options);
-      if (null != responseDataFromCache) return _buildResponse(responseDataFromCache, options);
+      if (null != responseDataFromCache)
+        return _buildResponse(responseDataFromCache, options);
     }
     return options;
   }
@@ -42,24 +44,29 @@ class DioCacheManager {
   _onError(DioError e) async {
     if (e.request.extra.containsKey(DIO_CACHE_KEY_MAX_AGE)) {
       var responseDataFromCache = await _pullFromCacheBeforeMaxStale(e.request);
-      if (null != responseDataFromCache) return _buildResponse(responseDataFromCache, e.request);
+      if (null != responseDataFromCache)
+        return _buildResponse(responseDataFromCache, e.request);
     }
     return e;
   }
 
   Response _buildResponse(String data, RequestOptions options) {
     return Response(
-        data: data,
+        data: (options.responseType == ResponseType.json)
+            ? jsonDecode(data)
+            : data,
         headers: DioHttpHeaders.fromMap(options.headers),
         extra: options.extra..remove(DIO_CACHE_KEY_MAX_AGE));
   }
 
   Future<String> _pullFromCacheBeforeMaxAge(RequestOptions options) {
-    return _manager.pullFromCacheBeforeMaxAge(options.uri.toString(), subKey: options.extra[DIO_CACHE_KEY_SUB_KEY]);
+    return _manager.pullFromCacheBeforeMaxAge(options.uri.toString(),
+        subKey: options.extra[DIO_CACHE_KEY_SUB_KEY]);
   }
 
   Future<String> _pullFromCacheBeforeMaxStale(RequestOptions options) {
-    return _manager.pullFromCacheBeforeMaxStale(options.uri.toString(), subKey: options.extra[DIO_CACHE_KEY_SUB_KEY]);
+    return _manager.pullFromCacheBeforeMaxStale(options.uri.toString(),
+        subKey: options.extra[DIO_CACHE_KEY_SUB_KEY]);
   }
 
   _pushToCache(Response response) {
@@ -67,7 +74,9 @@ class DioCacheManager {
     Duration maxAge = options.extra[DIO_CACHE_KEY_MAX_AGE];
     Duration maxStale = options.extra[DIO_CACHE_KEY_MAX_STALE];
     var obj = CacheObj(options.uri.toString(), jsonEncode(response.data),
-        subKey: options.extra[DIO_CACHE_KEY_SUB_KEY], maxAge: maxAge, maxStale: maxStale);
+        subKey: options.extra[DIO_CACHE_KEY_SUB_KEY],
+        maxAge: maxAge,
+        maxStale: maxStale);
     _manager.pushToCache(obj);
   }
 

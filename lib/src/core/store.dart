@@ -9,6 +9,7 @@ import 'package:sqflite/sqflite.dart';
 
 abstract class BaseCacheStore {
   CacheConfig config;
+
   BaseCacheStore(this.config);
 
   Future<CacheObj> getCacheObj(String key, {String subKey});
@@ -23,7 +24,7 @@ abstract class BaseCacheStore {
 class DiskCacheStore extends BaseCacheStore {
   Future<Database> _database;
 
-  final String tableCacheObject = "cacheObj";
+  final String tableCacheObject = "cache_dio";
   final String columnKey = "key";
   final String columnSubKey = "subKey";
   final String columnMaxAgeDate = "max_age_date";
@@ -35,6 +36,7 @@ class DiskCacheStore extends BaseCacheStore {
   }
 
   _init() async {
+    print(">>> _init database");
     var databasesPath = await getDatabasesPath();
     var path = join(databasesPath, "${config.databaseName}.db");
     try {
@@ -43,8 +45,8 @@ class DiskCacheStore extends BaseCacheStore {
       print(e);
     }
 
-    _database = openDatabase(path, version: 1, onCreate: (Database db, int version) async {
-      await db.execute('''
+    _database = openDatabase(path);
+    _database.then((db) => db.execute('''
       CREATE TABLE IF NOT EXISTS $tableCacheObject ( 
         $columnKey text, 
         $columnSubKey text, 
@@ -53,8 +55,7 @@ class DiskCacheStore extends BaseCacheStore {
         $columnContent text,
         PRIMARY KEY ($columnKey, $columnSubKey)
         ) 
-      ''');
-    });
+      '''));
   }
 
   @override
@@ -62,10 +63,11 @@ class DiskCacheStore extends BaseCacheStore {
     var where = "$columnKey=\"$key\"";
     if (null != subKey) where += " and $columnSubKey=\"$subKey\"";
 
-    return _database.then((db) => db.query(tableCacheObject, where: where).then((list) {
-          if (null == list || list.length <= 0) return null;
-          return _decryptCacheObj(CacheObj.fromJson(list[0]));
-        }));
+    return _database
+        ?.then((db) => db.query(tableCacheObject, where: where).then((list) {
+              if (null == list || list.length <= 0) return null;
+              return _decryptCacheObj(CacheObj.fromJson(list[0]));
+            }));
   }
 
   @override
@@ -76,7 +78,7 @@ class DiskCacheStore extends BaseCacheStore {
     else
       content = base64.encode(utf8.encode(content));
 
-    _database.then((db) => db.execute(
+    _database?.then((db) => db.execute(
         "REPLACE INTO $tableCacheObject($columnKey,$columnSubKey,$columnMaxAgeDate,$columnMaxStaleDate,$columnContent)"
         " values(\"${obj.key}\",\"${obj.subKey ?? ""}\",${obj.maxAgeDate ?? 0},${obj.maxStaleDate ?? 0},\"${content}\")"));
   }
@@ -85,13 +87,14 @@ class DiskCacheStore extends BaseCacheStore {
   delete(String key, {String subKey}) {
     var where = "$columnKey=\"$key\"";
     if (null != subKey) where += " and $columnSubKey=\"$subKey\"";
-    _database.then((db) => db.delete(tableCacheObject, where: where));
+    _database?.then((db) => db.delete(tableCacheObject, where: where));
   }
 
   @override
   clearExpired() {
     var now = DateTime.now().millisecondsSinceEpoch;
-    _database.then((db) => db.delete(tableCacheObject, where: "$columnMaxStaleDate<$now"));
+    _database?.then(
+        (db) => db.delete(tableCacheObject, where: "$columnMaxStaleDate<$now"));
   }
 
   Future<CacheObj> _decryptCacheObj(CacheObj obj) async {
@@ -111,16 +114,19 @@ class MemoryCacheStore extends BaseCacheStore {
     _initMap();
   }
 
-  _initMap() => _mapCache = MapCache.lru(maximumSize: config.maxMemoryCacheCount);
+  _initMap() =>
+      _mapCache = MapCache.lru(maximumSize: config.maxMemoryCacheCount);
 
   @override
-  Future<CacheObj> getCacheObj(String key, {String subKey = ""}) => _mapCache.get("${key}_$subKey");
+  Future<CacheObj> getCacheObj(String key, {String subKey = ""}) =>
+      _mapCache.get("${key}_$subKey");
 
   @override
   setCacheObj(CacheObj obj) => _mapCache.set("${obj.key}_${obj.subKey}", obj);
 
   @override
-  delete(String key, {String subKey}) => _mapCache.invalidate("${key}_${subKey ?? ""}");
+  delete(String key, {String subKey}) =>
+      _mapCache.invalidate("${key}_${subKey ?? ""}");
 
   @override
   clearExpired() {
