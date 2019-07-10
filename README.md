@@ -8,7 +8,7 @@ Inspired by [flutter_cache_manager](https://github.com/renefloor/flutter_cache_m
 
 ### Add Dependency
 
-```
+```yaml
 dio_cache:
     git:
       url: https://github.com/hurshi/dio-cache
@@ -18,13 +18,13 @@ dio_cache:
 
 1. Add a dio-cache interceptor in Dio :
 
-   ```
+   ```dart
    dio.interceptors.add(DioCacheManager(CacheConfig()).interceptor);
    ```
 
 2. Set maxAge for a request :
 
-   ```
+   ```dart
    Dio().get(
      "http://www.google.com",
      options: buildCacheOptions(Duration(days: 7)),
@@ -37,7 +37,7 @@ dio_cache:
 
 2. **StaleAge**: when errors occur, try to return cache before staleAge.
 
-   ```
+   ```dart
    buildCacheOptions(Duration(days: 7), staleAge: Duration(days: 10))
    ```
 
