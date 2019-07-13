@@ -5,6 +5,7 @@ import 'package:dio_cache/src/core/config.dart';
 import 'package:dio_cache/src/core/obj.dart';
 import 'package:path/path.dart';
 import 'package:quiver/cache.dart';
+import 'package:quiver/time.dart';
 import 'package:sqflite/sqflite.dart';
 
 abstract class BaseCacheStore {
@@ -22,8 +23,6 @@ abstract class BaseCacheStore {
 }
 
 class DiskCacheStore extends BaseCacheStore {
-  Future<Database> _database;
-
   final String tableCacheObject = "cache_dio";
   final String columnKey = "key";
   final String columnSubKey = "subKey";
@@ -31,21 +30,28 @@ class DiskCacheStore extends BaseCacheStore {
   final String columnMaxStaleDate = "max_stale_date";
   final String columnContent = "content";
 
-  DiskCacheStore(CacheConfig config) : super(config) {
-    _init();
+  Future<Database> _db;
+
+  Future<Database> get _database {
+    if (null == _db) {
+      _db = getDatabasesPath().then((path) {
+        Directory(path).create(recursive: true);
+        return path;
+      }).then((path) {
+        path = join(path, "${config.databaseName}.db");
+        return openDatabase(path);
+      }).then((db) {
+        _onDatabaseOpen(db);
+        return db;
+      });
+    }
+    return _db;
   }
 
-  _init() async {
-    var databasesPath = await getDatabasesPath();
-    var path = join(databasesPath, "${config.databaseName}.db");
-    try {
-      await Directory(databasesPath).create(recursive: true);
-    } catch (e) {
-      print(e);
-    }
+  DiskCacheStore(CacheConfig config) : super(config);
 
-    _database = openDatabase(path);
-    _database.then((db) => db.execute('''
+  _onDatabaseOpen(Database db) {
+    db.execute('''
       CREATE TABLE IF NOT EXISTS $tableCacheObject ( 
         $columnKey text, 
         $columnSubKey text, 
@@ -54,7 +60,7 @@ class DiskCacheStore extends BaseCacheStore {
         $columnContent text,
         PRIMARY KEY ($columnKey, $columnSubKey)
         ) 
-      '''));
+      ''');
     clearExpired();
   }
 
@@ -62,12 +68,12 @@ class DiskCacheStore extends BaseCacheStore {
   Future<CacheObj> getCacheObj(String key, {String subKey}) {
     var where = "$columnKey=\"$key\"";
     if (null != subKey) where += " and $columnSubKey=\"$subKey\"";
-
     return _database
-        ?.then((db) => db.query(tableCacheObject, where: where).then((list) {
-              if (null == list || list.length <= 0) return null;
-              return _decryptCacheObj(CacheObj.fromJson(list[0]));
-            }));
+        .then((db) => db.query(tableCacheObject, where: where))
+        .then((list) {
+      if (null == list || list.length <= 0) return null;
+      return _decryptCacheObj(CacheObj.fromJson(list[0]));
+    });
   }
 
   @override
@@ -93,8 +99,10 @@ class DiskCacheStore extends BaseCacheStore {
   @override
   clearExpired() {
     var now = DateTime.now().millisecondsSinceEpoch;
-    _database?.then(
-        (db) => db.delete(tableCacheObject, where: "$columnMaxStaleDate<$now"));
+    _database?.then((db) => db.delete(tableCacheObject,
+        where: "$columnMaxStaleDate > 0 and $columnMaxStaleDate < $now"));
+    _database?.then((db) => db.delete(tableCacheObject,
+        where: "$columnMaxStaleDate <= 0 and $columnMaxAgeDate < $now"));
   }
 
   Future<CacheObj> _decryptCacheObj(CacheObj obj) async {
