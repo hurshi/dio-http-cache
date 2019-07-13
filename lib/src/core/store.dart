@@ -36,7 +36,6 @@ class DiskCacheStore extends BaseCacheStore {
   }
 
   _init() async {
-    print(">>> _init database");
     var databasesPath = await getDatabasesPath();
     var path = join(databasesPath, "${config.databaseName}.db");
     try {
@@ -56,6 +55,7 @@ class DiskCacheStore extends BaseCacheStore {
         PRIMARY KEY ($columnKey, $columnSubKey)
         ) 
       '''));
+    clearExpired();
   }
 
   @override

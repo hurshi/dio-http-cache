@@ -30,13 +30,13 @@ class CacheManager {
     }
     if (null != obj) {
       if (null != obj.maxStaleDate && obj.maxStaleDate > 0) {
-        //if maxStaleDate exist, Remove maxStaleDate when it expires.
+        //if maxStaleDate exist, Remove it if maxStaleDate expired.
         if (obj.maxStaleDate < DateTime.now().millisecondsSinceEpoch) {
           delete(key, subKey: subKey);
           return null;
         }
       } else {
-        //if maxStaleDate NOT exist, Remove maxAgeDate when it expires.
+        //if maxStaleDate NOT exist, Remove it if maxAgeDate expired.
         if (obj.maxAgeDate < DateTime.now().millisecondsSinceEpoch) {
           delete(key, subKey: subKey);
           return null;
@@ -48,7 +48,9 @@ class CacheManager {
 
   Future<String> pullFromCacheBeforeMaxAge(String key, {String subKey}) {
     return _pullFromCache(key, subKey: subKey).then((obj) {
-      if (null != obj && null != obj.maxAgeDate && obj.maxAgeDate < DateTime.now().millisecondsSinceEpoch) {
+      if (null != obj &&
+          null != obj.maxAgeDate &&
+          obj.maxAgeDate < DateTime.now().millisecondsSinceEpoch) {
         return null;
       }
       return obj?.content;
@@ -68,7 +70,8 @@ class CacheManager {
     if (null == obj.maxAgeDate || obj.maxAgeDate <= 0) {
       obj.maxAge = _config.defaultMaxAge;
     }
-    if ((null == obj.maxStaleDate || obj.maxStaleDate <= 0) && null != _config.defaultMaxStale) {
+    if ((null == obj.maxStaleDate || obj.maxStaleDate <= 0) &&
+        null != _config.defaultMaxStale) {
       obj.maxStale = _config.defaultMaxStale;
     }
     _memoryCacheStore?.setCacheObj(obj);
