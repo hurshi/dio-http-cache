@@ -15,12 +15,7 @@ dependencies:
   path: ^1.6.2
   json_serializable: ^3.0.0
   dio: 2.1.10
-
-  sqflite:
-    git:
-      url: https://github.com/hurshi/sqflite
-      path: sqflite
-#  sqflite: ^1.1.6
+  sqflite: ^1.1.6
 
 dev_dependencies:
   flutter_test:
