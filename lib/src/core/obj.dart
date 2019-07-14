@@ -14,7 +14,8 @@ class CacheObj {
 
   CacheObj._(this.key, this.subKey, this.content);
 
-  factory CacheObj(String key, String content, {String subKey = "", Duration maxAge, Duration maxStale}) {
+  factory CacheObj(String key, String content,
+      {String subKey = "", Duration maxAge, Duration maxStale}) {
     return CacheObj._(key, subKey, content)
       ..maxAge = maxAge
       ..maxStale = maxStale;
@@ -28,9 +29,11 @@ class CacheObj {
     if (null != duration) this.maxStaleDate = _convertDuration(duration);
   }
 
-  _convertDuration(Duration duration) => DateTime.now().add(duration).millisecondsSinceEpoch;
+  _convertDuration(Duration duration) =>
+      DateTime.now().add(duration).millisecondsSinceEpoch;
 
-  factory CacheObj.fromJson(Map<String, dynamic> json) => _$CacheObjFromJson(json);
+  factory CacheObj.fromJson(Map<String, dynamic> json) =>
+      _$CacheObjFromJson(json);
 
   toJson() => _$CacheObjToJson(this);
 }
