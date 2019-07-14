@@ -1,24 +1,24 @@
-# dio-cache
+# dio-http-cache
 
 [中文介绍](./README_zh.md)
 
-Dio-cache is a cache library for [Dio ( http client for flutter )](https://github.com/flutterchina/dio), like [Rxcache](https://github.com/VictorAlbertos/RxCache) in Android.
+Dio-http-cache is a cache library for [Dio ( http client for flutter )](https://github.com/flutterchina/dio), like [Rxcache](https://github.com/VictorAlbertos/RxCache) in Android.
 
-Dio-cache uses [sqflite](https://github.com/tekartik/sqflite) as  disk cache, and  [LRU](https://github.com/google/quiver-dart) strategy as memory cache.
+Dio-http-cache uses [sqflite](https://github.com/tekartik/sqflite) as  disk cache, and  [LRU](https://github.com/google/quiver-dart) strategy as memory cache.
 
 Inspired by [flutter_cache_manager](https://github.com/renefloor/flutter_cache_manager).
 
 ### Add Dependency
 
 ```yaml
-dio_cache:
+dio_http_cache:
     git:
-      url: https://github.com/hurshi/dio-cache
+      url: https://github.com/hurshi/dio-http-cache
 ```
 
 ### QuickStart
 
-1. Add a dio-cache interceptor in Dio :
+1. Add a dio-http-cache interceptor in Dio :
 
    ```dart
    dio.interceptors.add(DioCacheManager(CacheConfig()).interceptor);
@@ -45,7 +45,7 @@ dio_cache:
 
 3. **encrypt / decrypt**: custom encrypt config with `CacheConfig`.
 
-4. **subKey**: dio-cache use url as key, you can add a subKey when necessary, such as different params with the same request.
+4. **subKey**: dio-http-cache use url as key, you can add a subKey when necessary, such as different params with the same request.
 
 ### License
 

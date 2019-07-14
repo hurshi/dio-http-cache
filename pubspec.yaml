@@ -1,8 +1,8 @@
-name: dio_cache
+name: dio_http_cache
 description: http cache lib for Flutter dio like RxCache.
 version: 0.0.1
 author: Hurshi <ihsruh@gmail.com>
-homepage: https://github.com/hurshi/dio-cache
+homepage: https://github.com/hurshi/dio-http-cache
 
 environment:
   sdk: ">=2.1.0 <3.0.0"

@@ -1,8 +1,8 @@
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:dio_cache/src/core/config.dart';
-import 'package:dio_cache/src/core/obj.dart';
+import 'package:dio_http_cache/src/core/config.dart';
+import 'package:dio_http_cache/src/core/obj.dart';
 import 'package:path/path.dart';
 import 'package:quiver/cache.dart';
 import 'package:sqflite/sqflite.dart';

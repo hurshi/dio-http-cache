@@ -1,16 +1,16 @@
 ### 简介
 
-* Dio-cache 是 Flutter 的 http 缓存库，为 [Dio](https://github.com/flutterchina/dio) 设计，就像 Android 中的 [RxCache](https://github.com/VictorAlbertos/RxCache) 一样；
+* Dio-http-cache 是 Flutter 的 http 缓存库，为 [Dio](https://github.com/flutterchina/dio) 设计，就像 Android 中的 [RxCache](https://github.com/VictorAlbertos/RxCache) 一样；
 
-* Dio-cache 使用 [sqflite](https://github.com/tekartik/sqflite) 作为磁盘缓存，使用 [Google/quiver-dart 的LRU算法](https://github.com/google/quiver-dart) 作为内存缓存策略；
+* Dio-http-cache 使用 [sqflite](https://github.com/tekartik/sqflite) 作为磁盘缓存，使用 [Google/quiver-dart 的LRU算法](https://github.com/google/quiver-dart) 作为内存缓存策略；
 * 有参考 [flutter_cache_manager](https://github.com/renefloor/flutter_cache_manager) 开发，为此感谢.
 
 ### 添加依赖
 
 ```yaml
-dio_cache:
+dio_http_cache:
     git:
-      url: https://github.com/hurshi/dio-cache
+      url: https://github.com/hurshi/dio-http-cache
 ```
 
 ### 简单使用

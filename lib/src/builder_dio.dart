@@ -1,5 +1,5 @@
 import 'package:dio/dio.dart';
-import 'package:dio_cache/src/manager_dio.dart';
+import 'package:dio_http_cache/src/manager_dio.dart';
 
 Options buildCacheOptions(Duration maxAge, {Options options, String subKey, Duration maxStale}) {
   if (null == options) options = Options();
