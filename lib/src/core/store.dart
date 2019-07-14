@@ -5,7 +5,6 @@ import 'package:dio_cache/src/core/config.dart';
 import 'package:dio_cache/src/core/obj.dart';
 import 'package:path/path.dart';
 import 'package:quiver/cache.dart';
-import 'package:quiver/time.dart';
 import 'package:sqflite/sqflite.dart';
 
 abstract class BaseCacheStore {
