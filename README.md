@@ -1,5 +1,7 @@
 # dio-cache
 
+[中文介绍](./README_zh.md)
+
 Dio-cache is a cache library for [Dio ( http client for flutter )](https://github.com/flutterchina/dio), like [Rxcache](https://github.com/VictorAlbertos/RxCache) in Android.
 
 Dio-cache uses [sqflite](https://github.com/tekartik/sqflite) as  disk cache, and  [LRU](https://github.com/google/quiver-dart) strategy as memory cache.
@@ -35,10 +37,10 @@ dio_cache:
 
 1. **MaxAge**: return cache directly before maxAge.
 
-2. **StaleAge**: when errors occur, try to return cache before staleAge.
+2. **MaxStale**: when errors occur, try to return cache before maxSotale.
 
    ```dart
-   buildCacheOptions(Duration(days: 7), staleAge: Duration(days: 10))
+   buildCacheOptions(Duration(days: 7), maxStale: Duration(days: 10))
    ```
 
 3. **encrypt / decrypt**: custom encrypt config with `CacheConfig`.

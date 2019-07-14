@@ -26,7 +26,7 @@ class CacheManager {
     var obj = await _memoryCacheStore?.getCacheObj(key, subKey: subKey);
     if (null == obj) {
       obj = await _diskCacheStore?.getCacheObj(key, subKey: subKey);
-      if (null != obj) _memoryCacheStore.setCacheObj(obj);
+      if (null != obj) _memoryCacheStore?.setCacheObj(obj);
     }
     if (null != obj) {
       if (null != obj.maxStaleDate && obj.maxStaleDate > 0) {

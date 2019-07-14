@@ -20,7 +20,7 @@ class CacheConfig {
       this.databaseName = "DioCache",
       this.skipDiskCache = false,
       this.skipMemoryCache = false,
-      this.maxMemoryCacheCount = 50,
+      this.maxMemoryCacheCount = 100,
       this.encrypt,
       this.decrypt});
 }
