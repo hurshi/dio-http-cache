@@ -8,7 +8,7 @@
 ### 添加依赖
 
 ```yaml
-dio_http_cache ^0.1.0
+dio_http_cache: ^0.1.0
 ```
 
 ### 简单使用
