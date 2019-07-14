@@ -99,10 +99,10 @@ class DiskCacheStore extends BaseCacheStore {
   @override
   clearExpired() {
     var now = DateTime.now().millisecondsSinceEpoch;
-    _database?.then((db) => db.delete(tableCacheObject,
-        where: "$columnMaxStaleDate > 0 and $columnMaxStaleDate < $now"));
-    _database?.then((db) => db.delete(tableCacheObject,
-        where: "$columnMaxStaleDate <= 0 and $columnMaxAgeDate < $now"));
+    var where1 = "$columnMaxStaleDate > 0 and $columnMaxStaleDate < $now";
+    var where2 = "$columnMaxStaleDate <= 0 and $columnMaxAgeDate < $now";
+    _database?.then((db) =>
+        db.delete(tableCacheObject, where: "( $where1 ) or ( $where2 )"));
   }
 
   Future<CacheObj> _decryptCacheObj(CacheObj obj) async {
