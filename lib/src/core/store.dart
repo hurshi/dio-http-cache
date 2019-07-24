@@ -19,6 +19,8 @@ abstract class BaseCacheStore {
   delete(String key, {String subKey});
 
   clearExpired();
+
+  clearAll();
 }
 
 class DiskCacheStore extends BaseCacheStore {
@@ -104,6 +106,11 @@ class DiskCacheStore extends BaseCacheStore {
         db.delete(tableCacheObject, where: "( $where1 ) or ( $where2 )"));
   }
 
+  @override
+  clearAll() {
+    _database?.then((db) => db.delete(tableCacheObject));
+  }
+
   Future<CacheObj> _decryptCacheObj(CacheObj obj) async {
     if (null != config.decrypt)
       obj.content = await config.decrypt(obj.content);
@@ -137,6 +144,11 @@ class MemoryCacheStore extends BaseCacheStore {
 
   @override
   clearExpired() {
+    clearAll();
+  }
+
+  @override
+  clearAll() {
     _mapCache = null;
     _initMap();
   }

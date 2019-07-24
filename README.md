@@ -11,7 +11,7 @@ Inspired by [flutter_cache_manager](https://github.com/renefloor/flutter_cache_m
 ### Add Dependency
 
 ```yaml
-dio_http_cache: ^0.1.0
+dio_http_cache: ^0.1.1
 ```
 
 ### QuickStart
@@ -33,17 +33,38 @@ dio_http_cache: ^0.1.0
 
 ### The advanced
 
-1. **MaxAge**: return cache directly before maxAge.
+1. **Custom your config by buildCacheOptions :**
+   1. ***MaxAge***: the only required param, set the cache time;
+   2. ***MaxStale***: set stale time. when error occur (like 500,404),try to return cache before maxStale.
+   3. ***subKey***: dio-http-cache use url as **key**,you can add a subKey when necessary, such as different params with the same request.
+   
+2. **Use "CacheConfig" to config default params**
+   
+   1. ***encrypt / decrypt:***  These two must be used together to encrypt the disk cache data, use base64 as default.
+   2. ***DefaultMaxAge:***  use `Duration(day:7)` as default.
+   3. ***DefaultaMaxStale:*** just like DefaultMaxAge
+   4. ***DatabaseName:*** database name.
+   5. ***SkipMemoryCache:*** false defalut.
+   6. ***SkipDiskCache:*** false default.
+   7. ***MaxMemoryCacheCount:*** 100 defalut.
+   
+3. **How to clear expired cache**
 
-2. **MaxStale**: when errors occur, try to return cache before maxSotale.
+   1. Just ignore it,this is automatic.
+   2. But if you must do it: `DioCacheManager.clearExpired();`
 
-   ```dart
-   buildCacheOptions(Duration(days: 7), maxStale: Duration(days: 10))
+4. **How to delete one cache**
+
+   ```
+   DioCacheManager.delete(url); //delete all the cache with url as the key
+   DioCacheManager.delete(url,subKey);
    ```
 
-3. **encrypt / decrypt**: custom encrypt config with `CacheConfig`.
+5. **How to clear All caches**
 
-4. **subKey**: dio-http-cache use url as key, you can add a subKey when necessary, such as different params with the same request.
+   ```
+   DioCacheManager.clearAll();
+   ```
 
 ### License
 

@@ -91,6 +91,11 @@ class CacheManager {
     _diskCacheStore?.clearExpired();
   }
 
+  clearAll() {
+    _memoryCacheStore?.clearAll();
+    _diskCacheStore?.clearAll();
+  }
+
   String _convertMd5(String str) {
     return hex(_md5.convert(_utf8encoder.convert(str)).bytes);
   }

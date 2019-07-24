@@ -60,12 +60,12 @@ class DioCacheManager {
   }
 
   Future<String> _pullFromCacheBeforeMaxAge(RequestOptions options) {
-    return _manager.pullFromCacheBeforeMaxAge(options.uri.toString(),
+    return _manager?.pullFromCacheBeforeMaxAge(options.uri.toString(),
         subKey: options.extra[DIO_CACHE_KEY_SUB_KEY]);
   }
 
   Future<String> _pullFromCacheBeforeMaxStale(RequestOptions options) {
-    return _manager.pullFromCacheBeforeMaxStale(options.uri.toString(),
+    return _manager?.pullFromCacheBeforeMaxStale(options.uri.toString(),
         subKey: options.extra[DIO_CACHE_KEY_SUB_KEY]);
   }
 
@@ -77,10 +77,12 @@ class DioCacheManager {
         subKey: options.extra[DIO_CACHE_KEY_SUB_KEY],
         maxAge: maxAge,
         maxStale: maxStale);
-    _manager.pushToCache(obj);
+    _manager?.pushToCache(obj);
   }
 
-  delete(String key, {String subKey}) => _manager.delete(key, subKey: subKey);
+  delete(String key, {String subKey}) => _manager?.delete(key, subKey: subKey);
 
-  clearExpired() => _manager.clearExpired();
+  clearExpired() => _manager?.clearExpired();
+
+  clearAll() => _manager?.clearAll();
 }

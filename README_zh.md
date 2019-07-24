@@ -8,7 +8,7 @@
 ### 添加依赖
 
 ```yaml
-dio_http_cache: ^0.1.0
+dio_http_cache: ^0.1.1
 ```
 
 ### 简单使用
@@ -32,8 +32,19 @@ dio_http_cache: ^0.1.0
 
 1. **buildCacheOptions可以配置多种参数满足不同的缓存需求：**
    1. ***MaxAge:*** 只有这个是必须的参数，设置缓存的时间；
+   
    2. ***MaxStale:*** 设置过期时常，在maxAge过期，而请求网络**失败**的时候，如果maxStale没有过期，则会使用这个缓存数据。
-   3. ***subKey:*** cache_dio 默认使用 url 作为缓存 key ,但当 url 不够用的时候，比如 post 请求不同参数比如分页的时候，就需要配合subKey使用。
+   
+      ```dart
+      buildCacheOptions(Duration(days: 7), maxStale: Duration(days: 10))
+      ```
+   
+   3. ***subKey:*** dio-http-cache 默认使用 url 作为缓存 key ,但当 url 不够用的时候，比如 post 请求不同参数比如分页的时候，就需要配合subKey使用。
+   
+      ```dart
+      buildCacheOptions(Duration(days: 7), subKey: "page=1")
+      ```
+   
 2. **CacheConfig 可以配置一些默认参数：**
    1. ***encrypt / dectrypt:*** 这2个必须组合使用，实现磁盘缓存数据的加密，如果没有设置加密，默认会用 base64 重新编码再存到数据库。
    2. ***DefaultMaxAge:*** 默认值为 Duration( day: 7 ), 在上面 buildCacheOption 中如果没有配置 MaxAge 有错误，或者自己实现了 option 而没有配置 MaxAge, 会使用这个默认值；
@@ -42,3 +53,39 @@ dio_http_cache: ^0.1.0
    5. ***SkipMemoryCache:*** 默认 false；
    6. ***SkipDiskCache:*** 默认 false;
    7. ***MaxMemoryCacheCount:*** 最大的内存缓存数量，默认100；
+   
+3. **如何清理已过期缓存**
+
+   * 会自动清理不用管
+   * 如果非要清理，可以调用：`DioCacheManager.clearExpired();`
+
+4. **如何删除一条记录**
+
+   ```
+   DioCacheManager.delete(url);//会删除所有 url 的缓存。
+   DioCacheManager.delete(url,subKey);
+   ```
+
+5. **如何清理所有缓存**（不管有没有过期）
+
+   ```
+   DioCacheManager.clearAll();
+   ```
+
+### License
+
+   ```
+Copyright 2019 Hurshi
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+   ```

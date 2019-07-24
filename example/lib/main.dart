@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:dio/dio.dart';
 import 'package:dio_http_cache/dio_http_cache.dart';
@@ -10,11 +11,11 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
+      title: 'dio-http-cache',
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: MyHomePage(title: 'Flutter Demo Home Page'),
+      home: MyHomePage(title: 'dio-http-cache'),
     );
   }
 }
@@ -29,38 +30,99 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  String _content = "Hello";
-  var _url = "https://5d241383e39785001406ead9.mockapi.io/user";
+  String _content =
+      "press to request \nhttps://www.wanandroid.com/article/query/0/json";
+  var _url = "https://www.wanandroid.com/article/query/0/json";
   static DioCacheManager _manager = DioCacheManager(CacheConfig());
-  var _dio = Dio()..interceptors.add(_manager.interceptor);
 
-  void _doPost() {
-    _dio.post(_url, options: buildCacheOptions(Duration(hours: 1), subKey: "id=1")).then((response) {
+  var _dio = Dio(BaseOptions(
+      contentType: ContentType.parse(
+          "application/x-www-form-urlencoded; charset=utf-8")))
+    ..interceptors.add(_manager.interceptor);
+
+  var _controller = TextEditingController(text: "flutter");
+
+  void _doPost(String keyword) {
+    setState(() {
+      _content = "Requesting $keyword ...";
+    });
+    _dio
+        .post(_url,
+            data: {'k': keyword},
+            options:
+                buildCacheOptions(Duration(hours: 1), subKey: "k=$keyword"))
+        .then((response) {
       setState(() {
         _content = jsonEncode(response.data);
       });
     });
   }
 
+  void _deleteCache(String url, {String subKey}) {
+    _manager.delete(url, subKey: subKey);
+  }
+
+  void _clearExpired() {
+    _manager.clearExpired();
+  }
+
+  void _clearAll() {
+    _manager.clearAll();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text(widget.title),
-      ),
-      body: Center(
-        child: SingleChildScrollView(
-          child: Text(
-            '$_content',
-            style: Theme.of(context).textTheme.display1,
-          ),
+        appBar: AppBar(
+          title: Text(widget.title),
         ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _doPost,
-        tooltip: 'Increment',
-        child: Icon(Icons.add),
-      ), // This trailing comma makes auto-formatting nicer for build methods.
-    );
+        body: Center(
+            child: Column(children: <Widget>[
+          MaterialButton(
+            child: Text("Delete cache by key"),
+            color: Colors.blue,
+            onPressed: () {
+              _deleteCache(_url);
+            },
+          ),
+          MaterialButton(
+            child: Text("Delete cache by key and subkey=flutter"),
+            color: Colors.blue,
+            onPressed: () {
+              _deleteCache(_url, subKey: "k=flutter");
+            },
+          ),
+          MaterialButton(
+            child: Text("clear all cache"),
+            color: Colors.blue,
+            onPressed: () {
+              _clearAll();
+            },
+          ),
+          Row(children: <Widget>[
+            Expanded(
+                child: TextField(
+                    controller: _controller,
+                    decoration: InputDecoration(
+                      labelText: "request params",
+                    ))),
+            IconButton(
+                icon: Icon(
+                  Icons.check_circle,
+                  color: Colors.blue,
+                ),
+                iconSize: 35,
+                onPressed: () {
+                  _doPost(_controller.text);
+                })
+          ]),
+          Expanded(
+            child: SingleChildScrollView(
+                child: Text(
+              '$_content',
+              style: TextStyle(color: Colors.blueGrey),
+            )),
+          )
+        ])));
   }
 }
