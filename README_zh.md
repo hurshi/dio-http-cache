@@ -33,13 +33,13 @@ dio_http_cache: ^0.1.1
 1. **buildCacheOptions可以配置多种参数满足不同的缓存需求：**
    1. ***MaxAge:*** 只有这个是必须的参数，设置缓存的时间；
    
-   2. ***MaxStale:*** 设置过期时常，在maxAge过期，而请求网络**失败**的时候，如果maxStale没有过期，则会使用这个缓存数据。
+   2. ***MaxStale:*** 设置过期时常；在maxAge过期，而请求网络**失败**的时候，如果maxStale没有过期，则会使用这个缓存数据。
    
       ```dart
       buildCacheOptions(Duration(days: 7), maxStale: Duration(days: 10))
       ```
    
-   3. ***subKey:*** dio-http-cache 默认使用 url 作为缓存 key ,但当 url 不够用的时候，比如 post 请求不同参数比如分页的时候，就需要配合subKey使用。
+   3. ***subKey:*** dio-http-cache 默认使用 url 作为缓存 key ,但当 url 不够用的时候，比如 post 请求分页数据的时候，就需要配合subKey使用。
    
       ```dart
       buildCacheOptions(Duration(days: 7), subKey: "page=1")
@@ -62,14 +62,14 @@ dio_http_cache: ^0.1.1
 4. **如何删除一条记录**
 
    ```
-   DioCacheManager.delete(url);//会删除所有 url 的缓存。
-   DioCacheManager.delete(url,subKey);
+   _dioCacheManager.delete(url);//会删除所有 url 的缓存。
+   _dioCacheManager.delete(url,subKey);
    ```
 
 5. **如何清理所有缓存**（不管有没有过期）
 
    ```
-   DioCacheManager.clearAll();
+   _dioCacheManager.clearAll();
    ```
 
 ### License
