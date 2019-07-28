@@ -83,10 +83,10 @@ dio_http_cache: ^0.1.1
 _dio.post(
 	"https://www.exmaple.com",
 	data: {'k': "keyword"},
-  options:buildCacheOptions(
-  	Duration(days: 3), 
-  	maxStale: Duration(days: 7), 
-  )
+	options:buildCacheOptions(
+  		Duration(days: 3), 
+  		maxStale: Duration(days: 7), 
+	)
 )
 ```
 
