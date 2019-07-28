@@ -77,6 +77,26 @@ dio_http_cache: ^0.1.1
    _dioCacheManager.clearAll();
    ```
 
+###  Example for maxAge and maxStale
+
+```dart
+_dio.post(
+	"https://www.exmaple.com",
+	data: {'k': "keyword"},
+  options:buildCacheOptions(
+  	Duration(days: 3), 
+  	maxStale: Duration(days: 7), 
+  )
+)
+```
+
+1. 0 ~ 3 days : Return data from cache directly (irrelevant with network).
+2. 3 ~ 7 days: 
+   1. Get data from network first.
+   2. If getting data from network succeeds, refresh cache.
+   3. If getting data from network fails or no network avaliable, get data from cache instead of an error.
+3. 7 ~ ∞ days: It won't use cache anymore, and the cache will be deleted at the right time.
+
 ### License
 
    ```
