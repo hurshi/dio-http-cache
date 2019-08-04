@@ -8,6 +8,7 @@ import 'package:dio_http_cache/src/core/obj.dart';
 const DIO_CACHE_KEY_MAX_AGE = "dio_cache_max_age";
 const DIO_CACHE_KEY_MAX_STALE = "dio_cache_max_stale";
 const DIO_CACHE_KEY_SUB_KEY = "dio_cache_sub_key";
+const DIO_CACHE_FORCE_UPDATE = "dio_cache_force_update";
 
 class DioCacheManager {
   CacheManager _manager;
@@ -26,7 +27,14 @@ class DioCacheManager {
   }
 
   _onRequest(RequestOptions options) async {
-    if (options.extra.containsKey(DIO_CACHE_KEY_MAX_AGE)) {
+    bool forceUpdate = false;
+    if ( options.extra.containsKey(DIO_CACHE_FORCE_UPDATE)){
+      forceUpdate =  (options.extra[DIO_CACHE_FORCE_UPDATE]);
+    }
+    bool useCache = !forceUpdate;
+    print(useCache);
+    if( useCache
+    && options.extra.containsKey(DIO_CACHE_KEY_MAX_AGE)) {
       var responseDataFromCache = await _pullFromCacheBeforeMaxAge(options);
       if (null != responseDataFromCache)
         return _buildResponse(responseDataFromCache, options);
