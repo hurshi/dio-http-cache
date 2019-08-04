@@ -32,7 +32,6 @@ class DioCacheManager {
       forceUpdate =  (options.extra[DIO_CACHE_FORCE_UPDATE]);
     }
     bool useCache = !forceUpdate;
-    print(useCache);
     if( useCache
     && options.extra.containsKey(DIO_CACHE_KEY_MAX_AGE)) {
       var responseDataFromCache = await _pullFromCacheBeforeMaxAge(options);
