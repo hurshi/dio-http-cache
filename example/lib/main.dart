@@ -38,7 +38,8 @@ class _MyHomePageState extends State<MyHomePage> {
   var _dio = Dio(BaseOptions(
       contentType: ContentType.parse(
           "application/x-www-form-urlencoded; charset=utf-8")))
-    ..interceptors.add(_manager.interceptor);
+    ..interceptors.add(_manager.interceptor)
+    ..httpClientAdapter = _getHttpClientAdapter();
 
   var _controller = TextEditingController(text: "flutter");
 
@@ -49,8 +50,8 @@ class _MyHomePageState extends State<MyHomePage> {
     _dio
         .post(_url,
             data: {'k': keyword},
-            options:
-                buildCacheOptions(Duration(hours: 1), subKey: "k=$keyword"))
+            options: buildCacheOptions(Duration(hours: 1),
+                subKey: "k=$keyword", forceRefresh: false))
         .then((response) {
       setState(() {
         _content = jsonEncode(response.data);
@@ -124,5 +125,21 @@ class _MyHomePageState extends State<MyHomePage> {
             )),
           )
         ])));
+  }
+
+  // set proxy
+  static DefaultHttpClientAdapter _getHttpClientAdapter() {
+    DefaultHttpClientAdapter httpClientAdapter;
+    httpClientAdapter = DefaultHttpClientAdapter();
+    httpClientAdapter.onHttpClientCreate = (HttpClient client) {
+      client.findProxy = (uri) {
+        return 'PROXY 10.0.0.103:8008';
+      };
+      client.badCertificateCallback =
+          (X509Certificate cert, String host, int port) {
+        return true;
+      };
+    };
+    return httpClientAdapter;
   }
 }
