@@ -54,7 +54,8 @@ class _MyHomePageState extends State<MyHomePage> {
                 subKey: "k=$keyword", forceRefresh: false))
         .then((response) {
       setState(() {
-        _content = jsonEncode(response.data);
+        _content =
+            "StatusCode = ${response.statusCode}\n${jsonEncode(response.data)}";
       });
     });
   }
