@@ -1,6 +1,6 @@
 ## [0.1.2] - 2019-08-06
 
-* Return Future<bool> for function delete, expire and so on.
+* Return `Future<bool>` for function delete, expire and so on.
 * Returns statusCode=200 if data was retrieved from the cache successfully.
 * Support for forced data refresh from the network.       
 

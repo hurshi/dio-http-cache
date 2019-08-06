@@ -47,6 +47,16 @@ dio_http_cache: ^0.1.2
       ```dart
       buildCacheOptions(Duration(days: 7), subKey: "page=1")
       ```
+      
+   4. ***forceRefresh***: false default.
+   
+      ```dart
+      buildCacheOptions(Duration(days: 7), forceRefresh: true)
+      ```
+   
+      * Get data from network first.
+      * If getting data from network succeeds, store or refresh cache.
+      * If getting data from network fails or no network avaliable, **try** get data from cache instead of an error.
    
 2. **Use "CacheConfig" to config default params**
   
@@ -94,7 +104,7 @@ _dio.post(
 2. 3 ~ 7 days: 
    1. Get data from network first.
    2. If getting data from network succeeds, refresh cache.
-   3. If getting data from network fails or no network avaliable, get data from cache instead of an error.
+   3. If getting data from network fails or no network avaliable, **try** get data from cache instead of an error.
 3. 7 ~ ∞ days: It won't use cache anymore, and the cache will be deleted at the right time.
 
 ### License
