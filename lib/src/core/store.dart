@@ -14,13 +14,13 @@ abstract class BaseCacheStore {
 
   Future<CacheObj> getCacheObj(String key, {String subKey});
 
-  setCacheObj(CacheObj obj);
+  Future<bool> setCacheObj(CacheObj obj);
 
-  delete(String key, {String subKey});
+  Future<bool> delete(String key, {String subKey});
 
-  clearExpired();
+  Future<bool> clearExpired();
 
-  clearAll();
+  Future<bool> clearAll();
 }
 
 class DiskCacheStore extends BaseCacheStore {
@@ -31,28 +31,23 @@ class DiskCacheStore extends BaseCacheStore {
   final String columnMaxStaleDate = "max_stale_date";
   final String columnContent = "content";
 
-  Future<Database> _db;
+  Database _db;
 
-  Future<Database> get _database {
+  Future<Database> get _database async {
     if (null == _db) {
-      _db = getDatabasesPath().then((path) {
-        Directory(path).create(recursive: true);
-        return path;
-      }).then((path) {
-        path = join(path, "${config.databaseName}.db");
-        return openDatabase(path);
-      }).then((db) {
-        _onDatabaseOpen(db);
-        return db;
-      });
+      var path = await getDatabasesPath();
+      await Directory(path).create(recursive: true);
+      path = join(path, "${config.databaseName}.db");
+      _db = await openDatabase(path);
+      await _onDatabaseOpen(_db);
     }
     return _db;
   }
 
   DiskCacheStore(CacheConfig config) : super(config);
 
-  _onDatabaseOpen(Database db) {
-    db.execute('''
+  _onDatabaseOpen(Database db) async {
+    await db.execute('''
       CREATE TABLE IF NOT EXISTS $tableCacheObject ( 
         $columnKey text, 
         $columnSubKey text, 
@@ -62,62 +57,78 @@ class DiskCacheStore extends BaseCacheStore {
         PRIMARY KEY ($columnKey, $columnSubKey)
         ) 
       ''');
-    clearExpired();
+    await _clearExpired(db);
   }
 
   @override
-  Future<CacheObj> getCacheObj(String key, {String subKey}) {
+  Future<CacheObj> getCacheObj(String key, {String subKey}) async {
+    var db = await _database;
+    if (null == db) return null;
     var where = "$columnKey=\"$key\"";
     if (null != subKey) where += " and $columnSubKey=\"$subKey\"";
-    return _database
-        .then((db) => db.query(tableCacheObject, where: where))
-        .then((list) {
-      if (null == list || list.length <= 0) return null;
-      return _decryptCacheObj(CacheObj.fromJson(list[0]));
-    });
+    var resultList = await db.query(tableCacheObject, where: where);
+    if (null == resultList || resultList.length <= 0) return null;
+    return await _decryptCacheObj(CacheObj.fromJson(resultList[0]));
   }
 
   @override
-  setCacheObj(CacheObj obj) async {
-    var content = obj.content;
-    if (null != config.encrypt)
-      content = await config.encrypt(content);
-    else
-      content = base64.encode(utf8.encode(content));
-
-    _database?.then((db) => db.execute(
+  Future<bool> setCacheObj(CacheObj obj) async {
+    var db = await _database;
+    if (null == db) return false;
+    var content = await _encryptCacheStr(obj.content);
+    await db.execute(
         "REPLACE INTO $tableCacheObject($columnKey,$columnSubKey,$columnMaxAgeDate,$columnMaxStaleDate,$columnContent)"
-        " values(\"${obj.key}\",\"${obj.subKey ?? ""}\",${obj.maxAgeDate ?? 0},${obj.maxStaleDate ?? 0},\"$content\")"));
+        " values(\"${obj.key}\",\"${obj.subKey ?? ""}\",${obj.maxAgeDate ?? 0},${obj.maxStaleDate ?? 0},\"$content\")");
+    return true;
   }
 
   @override
-  delete(String key, {String subKey}) {
+  Future<bool> delete(String key, {String subKey}) async {
+    var db = await _database;
+    if (null == db) return false;
     var where = "$columnKey=\"$key\"";
     if (null != subKey) where += " and $columnSubKey=\"$subKey\"";
-    _database?.then((db) => db.delete(tableCacheObject, where: where));
+    return 0 != await db.delete(tableCacheObject, where: where);
   }
 
   @override
-  clearExpired() {
+  Future<bool> clearExpired() async {
+    var db = await _database;
+    return _clearExpired(db);
+  }
+
+  Future<bool> _clearExpired(Database db) async {
+    if (null == db) return false;
     var now = DateTime.now().millisecondsSinceEpoch;
     var where1 = "$columnMaxStaleDate > 0 and $columnMaxStaleDate < $now";
     var where2 = "$columnMaxStaleDate <= 0 and $columnMaxAgeDate < $now";
-    _database?.then((db) =>
-        db.delete(tableCacheObject, where: "( $where1 ) or ( $where2 )"));
+    return 0 !=
+        await db.delete(tableCacheObject, where: "( $where1 ) or ( $where2 )");
   }
 
   @override
-  clearAll() {
-    _database?.then((db) => db.delete(tableCacheObject));
+  Future<bool> clearAll() async {
+    var db = await _database;
+    if (null == db) return false;
+    return 0 != await db.delete(tableCacheObject);
   }
 
   Future<CacheObj> _decryptCacheObj(CacheObj obj) async {
-    if (null != config.decrypt)
+    if (null != config.decrypt) {
       obj.content = await config.decrypt(obj.content);
-    else {
+    } else {
       obj.content = utf8.decode(base64.decode(obj.content));
     }
     return obj;
+  }
+
+  Future<String> _encryptCacheStr(String str) async {
+    if (null != config.encrypt) {
+      str = await config.encrypt(str);
+    } else {
+      str = base64.encode(utf8.encode(str));
+    }
+    return str;
   }
 }
 
@@ -132,24 +143,30 @@ class MemoryCacheStore extends BaseCacheStore {
       _mapCache = MapCache.lru(maximumSize: config.maxMemoryCacheCount);
 
   @override
-  Future<CacheObj> getCacheObj(String key, {String subKey = ""}) =>
+  Future<CacheObj> getCacheObj(String key, {String subKey = ""}) async =>
       _mapCache.get("${key}_$subKey");
 
   @override
-  setCacheObj(CacheObj obj) => _mapCache.set("${obj.key}_${obj.subKey}", obj);
-
-  @override
-  delete(String key, {String subKey}) =>
-      _mapCache.invalidate("${key}_${subKey ?? ""}");
-
-  @override
-  clearExpired() {
-    clearAll();
+  Future<bool> setCacheObj(CacheObj obj) async {
+    _mapCache.set("${obj.key}_${obj.subKey}", obj);
+    return true;
   }
 
   @override
-  clearAll() {
+  Future<bool> delete(String key, {String subKey}) async {
+    _mapCache.invalidate("${key}_${subKey ?? ""}");
+    return true;
+  }
+
+  @override
+  Future<bool> clearExpired() {
+    return clearAll();
+  }
+
+  @override
+  Future<bool> clearAll() async {
     _mapCache = null;
     _initMap();
+    return true;
   }
 }

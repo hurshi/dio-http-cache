@@ -11,7 +11,7 @@ Inspired by [flutter_cache_manager](https://github.com/renefloor/flutter_cache_m
 ### Add Dependency
 
 ```yaml
-dio_http_cache: ^0.1.1
+dio_http_cache: ^0.1.2
 ```
 
 ### QuickStart

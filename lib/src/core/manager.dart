@@ -26,19 +26,20 @@ class CacheManager {
     var obj = await _memoryCacheStore?.getCacheObj(key, subKey: subKey);
     if (null == obj) {
       obj = await _diskCacheStore?.getCacheObj(key, subKey: subKey);
-      if (null != obj) _memoryCacheStore?.setCacheObj(obj);
+      if (null != obj) await _memoryCacheStore?.setCacheObj(obj);
     }
     if (null != obj) {
+      var now = DateTime.now().millisecondsSinceEpoch;
       if (null != obj.maxStaleDate && obj.maxStaleDate > 0) {
         //if maxStaleDate exist, Remove it if maxStaleDate expired.
-        if (obj.maxStaleDate < DateTime.now().millisecondsSinceEpoch) {
-          delete(key, subKey: subKey);
+        if (obj.maxStaleDate < now) {
+          await delete(key, subKey: subKey);
           return null;
         }
       } else {
         //if maxStaleDate NOT exist, Remove it if maxAgeDate expired.
-        if (obj.maxAgeDate < DateTime.now().millisecondsSinceEpoch) {
-          delete(key, subKey: subKey);
+        if (obj.maxAgeDate < now) {
+          await delete(key, subKey: subKey);
           return null;
         }
       }
@@ -46,24 +47,23 @@ class CacheManager {
     return obj;
   }
 
-  Future<String> pullFromCacheBeforeMaxAge(String key, {String subKey}) {
-    return _pullFromCache(key, subKey: subKey).then((obj) {
-      if (null != obj &&
-          null != obj.maxAgeDate &&
-          obj.maxAgeDate < DateTime.now().millisecondsSinceEpoch) {
-        return null;
-      }
-      return obj?.content;
-    });
+  Future<String> pullFromCacheBeforeMaxAge(String key, {String subKey}) async {
+    var obj = await _pullFromCache(key, subKey: subKey);
+    if (null != obj &&
+        null != obj.maxAgeDate &&
+        obj.maxAgeDate < DateTime.now().millisecondsSinceEpoch) {
+      return null;
+    }
+    return obj?.content;
   }
 
-  Future<String> pullFromCacheBeforeMaxStale(String key, {String subKey}) {
-    return _pullFromCache(key, subKey: subKey).then((obj) {
-      return obj?.content;
-    });
+  Future<String> pullFromCacheBeforeMaxStale(String key,
+      {String subKey}) async {
+    var obj = await _pullFromCache(key, subKey: subKey);
+    return obj?.content;
   }
 
-  pushToCache(CacheObj obj) {
+  Future<bool> pushToCache(CacheObj obj) {
     obj.key = _convertMd5(obj.key);
     if (null != obj.subKey) obj.subKey = _convertMd5(obj.subKey);
 
@@ -74,29 +74,43 @@ class CacheManager {
         null != _config.defaultMaxStale) {
       obj.maxStale = _config.defaultMaxStale;
     }
-    _memoryCacheStore?.setCacheObj(obj);
-    _diskCacheStore?.setCacheObj(obj);
+
+    return _getCacheFutureResult(_memoryCacheStore, _diskCacheStore,
+        _memoryCacheStore?.setCacheObj(obj), _diskCacheStore?.setCacheObj(obj));
   }
 
-  delete(String key, {String subKey}) {
+  Future<bool> delete(String key, {String subKey}) {
     key = _convertMd5(key);
     if (null != subKey) subKey = _convertMd5(subKey);
 
-    _memoryCacheStore?.delete(key, subKey: subKey);
-    _diskCacheStore?.delete(key, subKey: subKey);
+    return _getCacheFutureResult(
+        _memoryCacheStore,
+        _diskCacheStore,
+        _memoryCacheStore?.delete(key, subKey: subKey),
+        _diskCacheStore?.delete(key, subKey: subKey));
   }
 
-  clearExpired() {
-    _memoryCacheStore?.clearExpired();
-    _diskCacheStore?.clearExpired();
+  Future<bool> clearExpired() {
+    return _getCacheFutureResult(_memoryCacheStore, _diskCacheStore,
+        _memoryCacheStore?.clearExpired(), _diskCacheStore?.clearExpired());
   }
 
-  clearAll() {
-    _memoryCacheStore?.clearAll();
-    _diskCacheStore?.clearAll();
+  Future<bool> clearAll() {
+    return _getCacheFutureResult(_memoryCacheStore, _diskCacheStore,
+        _memoryCacheStore?.clearAll(), _diskCacheStore?.clearAll());
   }
 
   String _convertMd5(String str) {
     return hex(_md5.convert(_utf8encoder.convert(str)).bytes);
+  }
+
+  Future<bool> _getCacheFutureResult(
+      MemoryCacheStore memoryCacheStore,
+      DiskCacheStore diskCacheStore,
+      Future<bool> memoryCacheFuture,
+      Future<bool> diskCacheFuture) async {
+    var result1 = (null == memoryCacheStore) ? true : (await memoryCacheFuture);
+    var result2 = (null == diskCacheStore) ? true : (await diskCacheFuture);
+    return result1 && result2;
   }
 }

@@ -11,7 +11,7 @@ Inspired by [flutter_cache_manager](https://github.com/renefloor/flutter_cache_m
 ### Add Dependency
 
 ```yaml
-dio_http_cache: ^0.1.1
+dio_http_cache: ^0.1.2
 ```
 
 ### QuickStart
@@ -35,36 +35,67 @@ dio_http_cache: ^0.1.1
 
 1. **Custom your config by buildCacheOptions :**
    1. ***MaxAge***: the only required param, set the cache time;
-   2. ***MaxStale***: set stale time. when error occur (like 500,404),try to return cache before maxStale.
-   3. ***subKey***: dio-http-cache use url as **key**,you can add a subKey when necessary, such as different params with the same request.
-
+   
+   2. ***MaxStale***: set stale time. When an error (like 500,404) occurs before maxStale, try to return cache .
+   
+      ```dart
+      buildCacheOptions(Duration(days: 7), maxStale: Duration(days: 10))
+      ```
+   
+   3. ***subKey***: dio-http-cache uses url as **key**,you can add a subKey when it's necessary, such as one request with different params.
+   
+      ```dart
+      buildCacheOptions(Duration(days: 7), subKey: "page=1")
+      ```
+   
 2. **Use "CacheConfig" to config default params**
-
-   1. ***encrypt / decrypt:***  These two must be used together to encrypt the disk cache data, use base64 as default.
+  
+   1. ***encrypt / decrypt:***  These two must be used together to encrypt the disk cache data, otherwise use base64 as default.
    2. ***DefaultMaxAge:***  use `Duration(day:7)` as default.
-   3. ***DefaultaMaxStale:*** just like DefaultMaxAge
+   3. ***DefaultaMaxStale:*** similar with DefaultMaxAge.
    4. ***DatabaseName:*** database name.
    5. ***SkipMemoryCache:*** false defalut.
    6. ***SkipDiskCache:*** false default.
    7. ***MaxMemoryCacheCount:*** 100 defalut.
-
+   
 3. **How to clear expired cache**
 
-   1. Just ignore it,this is automatic.
-   2. But if you must do it: `DioCacheManager.clearExpired();`
+   * Just ignore it, that is automatic.
+
+   * But if you insist : `DioCacheManager.clearExpired();`
 
 4. **How to delete one cache**
 
    ```
-   DioCacheManager.delete(url); //delete all the cache with url as the key
-   DioCacheManager.delete(url,subKey);
+   _dioCacheManager.delete(url); //delete all the cache with url as the key
+   _dioCacheManager.delete(url,subKey);
    ```
 
-5. **How to clear All caches**
+5. **How to clear All caches** (expired or not)
 
    ```
-   DioCacheManager.clearAll();
+   _dioCacheManager.clearAll();
    ```
+
+###  Example for maxAge and maxStale
+
+```dart
+_dio.post(
+	"https://www.exmaple.com",
+	data: {'k': "keyword"},
+	options:buildCacheOptions(
+  		Duration(days: 3), 
+  		maxStale: Duration(days: 7), 
+	)
+)
+```
+
+1. 0 ~ 3 days : Return data from cache directly (irrelevant with network).
+2. 3 ~ 7 days: 
+   1. Get data from network first.
+   2. If getting data from network succeeds, refresh cache.
+   3. If getting data from network fails or no network avaliable, get data from cache instead of an error.
+3. 7 ~ ∞ days: It won't use cache anymore, and the cache will be deleted at the right time.
 
 ### License
 

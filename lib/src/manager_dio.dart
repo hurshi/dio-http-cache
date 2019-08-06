@@ -34,9 +34,9 @@ class DioCacheManager {
     return options;
   }
 
-  _onResponse(Response response) {
+  _onResponse(Response response) async {
     if (response.request.extra.containsKey(DIO_CACHE_KEY_MAX_AGE)) {
-      _pushToCache(response);
+      await _pushToCache(response);
     }
     return response;
   }
@@ -56,7 +56,8 @@ class DioCacheManager {
             ? jsonDecode(data)
             : data,
         headers: DioHttpHeaders.fromMap(options.headers),
-        extra: options.extra..remove(DIO_CACHE_KEY_MAX_AGE));
+        extra: options.extra..remove(DIO_CACHE_KEY_MAX_AGE),
+        statusCode: 200);
   }
 
   Future<String> _pullFromCacheBeforeMaxAge(RequestOptions options) {
@@ -69,7 +70,7 @@ class DioCacheManager {
         subKey: options.extra[DIO_CACHE_KEY_SUB_KEY]);
   }
 
-  _pushToCache(Response response) {
+  Future<bool> _pushToCache(Response response) {
     RequestOptions options = response.request;
     Duration maxAge = options.extra[DIO_CACHE_KEY_MAX_AGE];
     Duration maxStale = options.extra[DIO_CACHE_KEY_MAX_STALE];
@@ -77,12 +78,13 @@ class DioCacheManager {
         subKey: options.extra[DIO_CACHE_KEY_SUB_KEY],
         maxAge: maxAge,
         maxStale: maxStale);
-    _manager?.pushToCache(obj);
+    return _manager?.pushToCache(obj);
   }
 
-  delete(String key, {String subKey}) => _manager?.delete(key, subKey: subKey);
+  Future<bool> delete(String key, {String subKey}) =>
+      _manager?.delete(key, subKey: subKey);
 
-  clearExpired() => _manager?.clearExpired();
+  Future<bool> clearExpired() => _manager?.clearExpired();
 
-  clearAll() => _manager?.clearAll();
+  Future<bool> clearAll() => _manager?.clearAll();
 }
