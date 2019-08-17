@@ -12,13 +12,13 @@ dependencies:
     sdk: flutter
   quiver: ^2.0.3
   json_serializable: ^3.0.0
-  json_annotation: ^2.4.0
-  dio: ^2.1.10
-  sqflite: ^1.1.6
+  json_annotation: ^3.0.0
+  dio: ^2.1.13
+  sqflite: ^1.1.6+3
   path: ^1.6.2
-  crypto: ^2.0.6
+  crypto: ^2.1.1+1
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
-  build_runner: ^1.0.0
+  build_runner: ^1.6.6

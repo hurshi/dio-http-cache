@@ -7,6 +7,7 @@ import 'package:dio_http_cache/src/core/obj.dart';
 
 const DIO_CACHE_KEY_MAX_AGE = "dio_cache_max_age";
 const DIO_CACHE_KEY_MAX_STALE = "dio_cache_max_stale";
+const DIO_CACHE_KEY_KEY = "dio_cache_key";
 const DIO_CACHE_KEY_SUB_KEY = "dio_cache_sub_key";
 const DIO_CACHE_KEY_FORCE_REFRESH = "dio_cache_force_refresh";
 
@@ -67,24 +68,41 @@ class DioCacheManager {
   }
 
   Future<String> _pullFromCacheBeforeMaxAge(RequestOptions options) {
-    return _manager?.pullFromCacheBeforeMaxAge(options.uri.toString(),
-        subKey: options.extra[DIO_CACHE_KEY_SUB_KEY]);
+    return _manager?.pullFromCacheBeforeMaxAge(
+        _getPrimaryKeyFromOptions(options),
+        subKey: _getSubKeyFromOptions(options));
   }
 
   Future<String> _pullFromCacheBeforeMaxStale(RequestOptions options) {
-    return _manager?.pullFromCacheBeforeMaxStale(options.uri.toString(),
-        subKey: options.extra[DIO_CACHE_KEY_SUB_KEY]);
+    return _manager?.pullFromCacheBeforeMaxStale(
+        _getPrimaryKeyFromOptions(options),
+        subKey: _getSubKeyFromOptions(options));
   }
 
   Future<bool> _pushToCache(Response response) {
     RequestOptions options = response.request;
     Duration maxAge = options.extra[DIO_CACHE_KEY_MAX_AGE];
     Duration maxStale = options.extra[DIO_CACHE_KEY_MAX_STALE];
-    var obj = CacheObj(options.uri.toString(), jsonEncode(response.data),
-        subKey: options.extra[DIO_CACHE_KEY_SUB_KEY],
+    var obj = CacheObj(
+        _getPrimaryKeyFromOptions(options), jsonEncode(response.data),
+        subKey: _getSubKeyFromOptions(options),
         maxAge: maxAge,
         maxStale: maxStale);
     return _manager?.pushToCache(obj);
+  }
+
+  String _getPrimaryKeyFromOptions(RequestOptions options) {
+    return options.extra.containsKey(DIO_CACHE_KEY_KEY)
+        ? options.extra[DIO_CACHE_KEY_KEY]
+        : "${options.uri.host}${options.uri.path}";
+  }
+
+  String _getSubKeyFromOptions(RequestOptions options) {
+    return options.extra.containsKey(DIO_CACHE_KEY_SUB_KEY)
+        ? options.extra[DIO_CACHE_KEY_SUB_KEY]
+        : '''${options.data.toString()}_
+             ${options.queryParameters.toString()}_
+             ${options.uri.query}''';
   }
 
   Future<bool> delete(String key, {String subKey}) =>
