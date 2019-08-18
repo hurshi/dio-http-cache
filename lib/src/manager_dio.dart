@@ -7,18 +7,21 @@ import 'package:dio_http_cache/src/core/obj.dart';
 
 const DIO_CACHE_KEY_MAX_AGE = "dio_cache_max_age";
 const DIO_CACHE_KEY_MAX_STALE = "dio_cache_max_stale";
-const DIO_CACHE_KEY_KEY = "dio_cache_key";
+const DIO_CACHE_KEY_PRIMARY_KEY = "dio_cache_primary_key";
 const DIO_CACHE_KEY_SUB_KEY = "dio_cache_sub_key";
 const DIO_CACHE_KEY_FORCE_REFRESH = "dio_cache_force_refresh";
 
 class DioCacheManager {
   CacheManager _manager;
   InterceptorsWrapper _interceptor;
+  String _baseUrl;
 
   DioCacheManager(CacheConfig config) {
     _manager = CacheManager(config);
+    _baseUrl = config.baseUrl;
   }
 
+  /// interceptor for http cache.
   get interceptor {
     if (null == _interceptor) {
       _interceptor = InterceptorsWrapper(
@@ -92,23 +95,62 @@ class DioCacheManager {
   }
 
   String _getPrimaryKeyFromOptions(RequestOptions options) {
-    return options.extra.containsKey(DIO_CACHE_KEY_KEY)
-        ? options.extra[DIO_CACHE_KEY_KEY]
-        : "${options.uri.host}${options.uri.path}";
+    return options.extra.containsKey(DIO_CACHE_KEY_PRIMARY_KEY)
+        ? options.extra[DIO_CACHE_KEY_PRIMARY_KEY]
+        : _getPrimaryKeyFromUri(options.uri);
   }
 
   String _getSubKeyFromOptions(RequestOptions options) {
     return options.extra.containsKey(DIO_CACHE_KEY_SUB_KEY)
         ? options.extra[DIO_CACHE_KEY_SUB_KEY]
-        : '''${options.data.toString()}_
-             ${options.queryParameters.toString()}_
-             ${options.uri.query}''';
+        : _getSubKeyFromUri(options.uri, data: options.data);
   }
 
-  Future<bool> delete(String key, {String subKey}) =>
-      _manager?.delete(key, subKey: subKey);
+  String _getPrimaryKeyFromUri(Uri uri) => "${uri?.host}${uri?.path}";
 
+  String _getSubKeyFromUri(Uri uri, {dynamic data}) =>
+      "${data?.toString()}_${uri?.query}";
+
+  /// delete local cache by primaryKey and optional subKey
+  Future<bool> delete(String primaryKey, {String subKey}) =>
+      _manager?.delete(primaryKey, subKey: subKey);
+
+  /// no matter what subKey is, delete local cache if primary matched.
+  Future<bool> deleteByPrimaryKeyWithUri(Uri uri) =>
+      delete(_getPrimaryKeyFromUri(uri));
+
+  Future<bool> deleteByPrimaryKey(String path) =>
+      deleteByPrimaryKeyWithUri(_getUriByPath(_baseUrl, path));
+
+  /// delete local cache when both primaryKey and subKey matched.
+  Future<bool> deleteByPrimaryKeyAndSubKeyWithUri(Uri uri,
+          {String subKey, dynamic data}) =>
+      delete(_getPrimaryKeyFromUri(uri),
+          subKey: subKey ?? _getSubKeyFromUri(uri, data: data));
+
+  Future<bool> deleteByPrimaryKeyAndSubKey(String path,
+          {Map<String, dynamic> queryParameters,
+          String subKey,
+          dynamic data}) =>
+      deleteByPrimaryKeyAndSubKeyWithUri(
+          _getUriByPath(_baseUrl, path,
+              data: data, queryParameters: queryParameters),
+          subKey: subKey,
+          data: data);
+
+  /// clear all expired cache.
   Future<bool> clearExpired() => _manager?.clearExpired();
 
+  /// empty local cache.
   Future<bool> clearAll() => _manager?.clearAll();
+
+  Uri _getUriByPath(String baseUrl, String path,
+      {dynamic data, Map<String, dynamic> queryParameters}) {
+    return RequestOptions(
+            baseUrl: baseUrl,
+            path: path,
+            data: data,
+            queryParameters: queryParameters)
+        .uri;
+  }
 }

@@ -2,13 +2,17 @@ import 'package:dio/dio.dart';
 import 'package:dio_http_cache/src/manager_dio.dart';
 
 Options buildCacheOptions(Duration maxAge,
-    {Options options, String key, String subKey, Duration maxStale, bool forceRefresh}) {
+    {Options options,
+    String primaryKey,
+    String subKey,
+    Duration maxStale,
+    bool forceRefresh}) {
   if (null == options) {
     options = Options();
   }
   options.extra.addAll({DIO_CACHE_KEY_MAX_AGE: maxAge});
-  if (null != key) {
-    options.extra.addAll({DIO_CACHE_KEY_KEY: key});
+  if (null != primaryKey) {
+    options.extra.addAll({DIO_CACHE_KEY_PRIMARY_KEY: primaryKey});
   }
   if (null != subKey) {
     options.extra.addAll({DIO_CACHE_KEY_SUB_KEY: subKey});
