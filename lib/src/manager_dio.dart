@@ -146,6 +146,9 @@ class DioCacheManager {
 
   Uri _getUriByPath(String baseUrl, String path,
       {dynamic data, Map<String, dynamic> queryParameters}) {
+    if (!path.startsWith(new RegExp(r"https?:"))) {
+      assert(null != baseUrl && baseUrl.length > 0);
+    }
     return RequestOptions(
             baseUrl: baseUrl,
             path: path,

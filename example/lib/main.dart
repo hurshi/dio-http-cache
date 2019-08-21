@@ -32,14 +32,18 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   String _content =
       "press to request \nhttps://www.wanandroid.com/article/query/0/json";
-  var _url = "https://www.wanandroid.com/article/query/0/json";
-  static DioCacheManager _manager = DioCacheManager(CacheConfig());
+  var _url = "article/query/0/json";
+  static DioCacheManager _manager =
+      DioCacheManager(CacheConfig(baseUrl: "https://www.wanandroid.com/"));
 
   var _dio = Dio(BaseOptions(
+      baseUrl: "https://www.wanandroid.com/",
       contentType: ContentType.parse(
           "application/x-www-form-urlencoded; charset=utf-8")))
     ..interceptors.add(_manager.interceptor)
-    ..httpClientAdapter = _getHttpClientAdapter();
+    ..interceptors.add(LogInterceptor(responseBody: true));
+
+//    ..httpClientAdapter = _getHttpClientAdapter();
 
   var _controller = TextEditingController(text: "flutter");
 
@@ -60,8 +64,16 @@ class _MyHomePageState extends State<MyHomePage> {
     });
   }
 
-  void _deleteCache(String url, {String subKey}) {
-    _manager.delete(url, subKey: subKey);
+  void _deleteCacheByPrimaryKey(String url) {
+    _manager.deleteByPrimaryKey(url).then((value) {
+      print(">>> delete result = $value");
+    });
+  }
+
+  void _deleteByPrimaryKeyAndSubKey(String url, {String subKey}) {
+    _manager.deleteByPrimaryKeyAndSubKey(url, subKey: subKey).then((value) {
+      print(">>> delete result = $value");
+    });
   }
 
   void _clearExpired() {
@@ -84,14 +96,14 @@ class _MyHomePageState extends State<MyHomePage> {
             child: Text("Delete cache by key"),
             color: Colors.blue,
             onPressed: () {
-              _deleteCache(_url);
+              _deleteCacheByPrimaryKey(_url);
             },
           ),
           MaterialButton(
             child: Text("Delete cache by key and subkey=flutter"),
             color: Colors.blue,
             onPressed: () {
-              _deleteCache(_url, subKey: "k=flutter");
+              _deleteByPrimaryKeyAndSubKey(_url, subKey: "k=flutter");
             },
           ),
           MaterialButton(

@@ -11,7 +11,7 @@ Inspired by [flutter_cache_manager](https://github.com/renefloor/flutter_cache_m
 ### Add Dependency
 
 ```yaml
-dio_http_cache: ^0.1.2
+dio_http_cache: ^0.1.3
 ```
 
 ### QuickStart
@@ -19,7 +19,7 @@ dio_http_cache: ^0.1.2
 1. Add a dio-http-cache interceptor in Dio :
 
    ```dart
-   dio.interceptors.add(DioCacheManager(CacheConfig()).interceptor);
+   dio.interceptors.add(DioCacheManager(CacheConfig(baseUrl: "http://www.google.com")).interceptor);
    ```
 
 2. Set maxAge for a request :
@@ -74,16 +74,48 @@ dio_http_cache: ^0.1.2
 
    * But if you insist : `DioCacheManager.clearExpired();`
 
-4. **How to delete one cache**
+4. **How to delete caches**
 
-   ```
-   _dioCacheManager.delete(url); //delete all the cache with url as the key
-   _dioCacheManager.delete(url,subKey);
-   ```
+   1. No matter what subKey is, delete local cache if primary matched.
+
+      ```dart
+      // Automatically parses primarykey from path
+      _dioCacheManager.deleteByPrimaryKey(path); 
+      ```
+
+   2. Delete local cache when both primaryKey and subKey matched.
+
+      ```dart
+      // delete local cache when both primaryKey and subKey matched.
+      _dioCacheManager.deleteByPrimaryKeyAndSubKey(path); 
+      ```
+
+      **INPORTANT:** If you have additional parameters when requesting the http interface, you must take them with it, for example:
+
+      ```dart
+      _dio.get(_url, queryParameters: {'k': keyword}, 
+      	options: buildCacheOptions(Duration(hours: 1)))
+      //delete the cache:
+      _dioCacheManager.deleteByPrimaryKeyAndSubKey(path, queryParameters:{'k': keyword}); 
+      ```
+
+      ```dart
+      _dio.post(_url, data: {'k': keyword}, 
+      	options: buildCacheOptions(Duration(hours: 1)))
+      //delete the cache:
+      _dioCacheManager.deleteByPrimaryKeyAndSubKey(path, data:{'k': keyword}); 
+      ```
+
+   3. Delete local cache by primaryKey and optional subKey if you know your primarykey and subkey exactly.
+
+      ```dart
+      // delete local cache by primaryKey and optional subKey
+      _dioCacheManager.delete(primaryKey,{subKey});
+      ```
 
 5. **How to clear All caches** (expired or not)
 
-   ```
+   ```dart
    _dioCacheManager.clearAll();
    ```
 
