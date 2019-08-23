@@ -96,14 +96,14 @@ dio_http_cache: ^0.1.3
       _dio.get(_url, queryParameters: {'k': keyword}, 
       	options: buildCacheOptions(Duration(hours: 1)))
       //delete the cache:
-      _dioCacheManager.deleteByPrimaryKeyAndSubKey(path, queryParameters:{'k': keyword}); 
+      _dioCacheManager.deleteByPrimaryKeyAndSubKey(_url, queryParameters:{'k': keyword}); 
       ```
 
       ```dart
       _dio.post(_url, data: {'k': keyword}, 
       	options: buildCacheOptions(Duration(hours: 1)))
       //delete the cache:
-      _dioCacheManager.deleteByPrimaryKeyAndSubKey(path, data:{'k': keyword}); 
+      _dioCacheManager.deleteByPrimaryKeyAndSubKey(_url, data:{'k': keyword}); 
       ```
 
    3. Delete local cache by primaryKey and optional subKey if you know your primarykey and subkey exactly.
