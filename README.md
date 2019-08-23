@@ -34,40 +34,43 @@ dio_http_cache: ^0.1.3
 ### The advanced
 
 1. **Custom your config by buildCacheOptions :**
-   1. ***MaxAge***: the only required param, set the cache time;
+  
+   1. **primaryKey:** By default, `host + path` is used as the primaryKey, and you can also customize it.
    
-   2. ***MaxStale***: set stale time. When an error (like 500,404) occurs before maxStale, try to return cache .
+   2. **subKey:** By default, query ( data or queryParameters) is used as subKey, and you can specify  the subKey when it's necessary, for example:
+   
+      ```dart
+      buildCacheOptions(Duration(days: 7), subKey: "page=1")
+      ```
+   
+   3. **maxAge:** the only required param, set the cache time;
+   
+   4. **maxStale:** set stale time. When an error (like 500,404) occurs before maxStale, try to return cache .
    
       ```dart
       buildCacheOptions(Duration(days: 7), maxStale: Duration(days: 10))
       ```
    
-   3. ***subKey***: dio-http-cache uses url as **key**,you can add a subKey when it's necessary, such as one request with different params.
-   
-      ```dart
-      buildCacheOptions(Duration(days: 7), subKey: "page=1")
-      ```
-      
-   4. ***forceRefresh***: false default.
+   5. **forceRefresh**: false default.
    
       ```dart
       buildCacheOptions(Duration(days: 7), forceRefresh: true)
       ```
    
-      * Get data from network first.
-      * If getting data from network succeeds, store or refresh cache.
-      * If getting data from network fails or no network avaliable, **try** get data from cache instead of an error.
+      1. Get data from network first.
+      2. If getting data from network succeeds, store or refresh cache.
+      3. If getting data from network fails or no network avaliable, **try** get data from cache instead of an error.
    
 2. **Use "CacheConfig" to config default params**
-  
-   1. ***encrypt / decrypt:***  These two must be used together to encrypt the disk cache data, otherwise use base64 as default.
-   2. ***DefaultMaxAge:***  use `Duration(day:7)` as default.
-   3. ***DefaultaMaxStale:*** similar with DefaultMaxAge.
-   4. ***DatabaseName:*** database name.
-   5. ***SkipMemoryCache:*** false defalut.
-   6. ***SkipDiskCache:*** false default.
-   7. ***MaxMemoryCacheCount:*** 100 defalut.
-   
+
+   1. **encrypt / decrypt:**  These two must be used together to encrypt the disk cache data, otherwise use base64 as default.
+   2. **DefaultMaxAge:**  use `Duration(day:7)` as default.
+   3. **DefaultaMaxStale:** similar with DefaultMaxAge.
+   4. **DatabaseName:** database name.
+   5. **SkipMemoryCache:** false defalut.
+   6. **SkipDiskCache:** false default.
+   7. **MaxMemoryCacheCount:** 100 defalut.
+
 3. **How to clear expired cache**
 
    * Just ignore it, that is automatic.
