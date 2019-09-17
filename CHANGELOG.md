@@ -1,4 +1,4 @@
-## [0.1.4] - 2019-08-21
+## [0.1.4] - 2019-09-17
 
 * Fix bug for remove memory cache by primary key
 
