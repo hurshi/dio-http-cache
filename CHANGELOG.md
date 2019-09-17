@@ -1,5 +1,10 @@
 ## [0.1.3] - 2019-08-21
 
+* Fix bug for remove memory cache by primary key
+
+
+## [0.1.3] - 2019-08-21
+
 * Change primaryKey to "host + path", and automatically use queryParams as the subKey.
 * Support for delete caches by primaryKey. (Parsing primaryKey from path).
 * Support for delete one cache by primaryKey and subKey. (Parsing primaryKey and subKey from path).

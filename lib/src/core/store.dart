@@ -1,3 +1,4 @@
+import 'dart:collection';
 import 'dart:convert';
 import 'dart:io';
 
@@ -78,7 +79,7 @@ class DiskCacheStore extends BaseCacheStore {
     var content = await _encryptCacheStr(obj.content);
     await db.execute(
         "REPLACE INTO $tableCacheObject($columnKey,$columnSubKey,$columnMaxAgeDate,$columnMaxStaleDate,$columnContent)"
-        " values(\"${obj.key}\",\"${obj.subKey ?? ""}\",${obj.maxAgeDate ?? 0},${obj.maxStaleDate ?? 0},\"$content\")");
+            " values(\"${obj.key}\",\"${obj.subKey ?? ""}\",${obj.maxAgeDate ?? 0},${obj.maxStaleDate ?? 0},\"$content\")");
     return true;
   }
 
@@ -134,13 +135,16 @@ class DiskCacheStore extends BaseCacheStore {
 
 class MemoryCacheStore extends BaseCacheStore {
   MapCache<String, CacheObj> _mapCache;
+  Map<String, List<String>> _keys;
 
   MemoryCacheStore(CacheConfig config) : super(config) {
     _initMap();
   }
 
-  _initMap() =>
-      _mapCache = MapCache.lru(maximumSize: config.maxMemoryCacheCount);
+  _initMap() {
+    _mapCache = MapCache.lru(maximumSize: config.maxMemoryCacheCount);
+    _keys = HashMap();
+  }
 
   @override
   Future<CacheObj> getCacheObj(String key, {String subKey = ""}) async =>
@@ -149,12 +153,14 @@ class MemoryCacheStore extends BaseCacheStore {
   @override
   Future<bool> setCacheObj(CacheObj obj) async {
     _mapCache.set("${obj.key}_${obj.subKey}", obj);
+    _storeKey(obj);
     return true;
   }
 
   @override
   Future<bool> delete(String key, {String subKey}) async {
-    _mapCache.invalidate("${key}_${subKey ?? ""}");
+//    _mapCache.invalidate("${key}_${subKey ?? ""}");
+    _removeKey(key, subKey: subKey).forEach((key) => _mapCache.invalidate(key));
     return true;
   }
 
@@ -166,7 +172,28 @@ class MemoryCacheStore extends BaseCacheStore {
   @override
   Future<bool> clearAll() async {
     _mapCache = null;
+    _keys = null;
     _initMap();
     return true;
+  }
+
+  _storeKey(CacheObj obj) {
+    List<String> subKeyList = _keys[obj.key];
+    if (null == subKeyList) subKeyList = List();
+    subKeyList.add(obj.subKey ?? "");
+    _keys[obj.key] = subKeyList;
+  }
+
+  List<String> _removeKey(String key, {String subKey}) {
+    List<String> subKeyList = _keys[key];
+    if (null == subKeyList || subKeyList.length <= 0) return [];
+    if (null == subKey) {
+      _keys.remove(key);
+      return subKeyList.map((sKey) => "${key}_$sKey").toList();
+    } else {
+      subKeyList.remove(subKey);
+      _keys[key] = subKeyList;
+      return ["${key}_$subKey"];
+    }
   }
 }
