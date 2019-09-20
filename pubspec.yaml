@@ -1,6 +1,6 @@
 name: dio_http_cache
 description: http cache lib for Flutter dio like RxCache.It use sqflite as disk cache,and google/quiver-dart/LRU strategy as memory cache.
-version: 0.1.4
+version: 0.2.0
 author: Hurshi <ihsruh@gmail.com>
 homepage: https://github.com/hurshi/dio-http-cache
 
@@ -13,7 +13,7 @@ dependencies:
   quiver: ^2.0.3
   json_serializable: ^3.0.0
   json_annotation: ^3.0.0
-  dio: ^2.1.13
+  dio: ^3.0.1
   sqflite: ^1.1.6+3
   path: ^1.6.2
   crypto: ^2.1.1+1

@@ -1,3 +1,8 @@
+## [0.2.0] - 2019-09-20
+
+* support for dio 3.0
+
+
 ## [0.1.4] - 2019-09-17
 
 * Fix bug for remove memory cache by primary key

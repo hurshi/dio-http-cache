@@ -8,7 +8,18 @@
 ### 添加依赖
 
 ```yaml
+dio_http_cache: ^0.2.0
+```
+
+如果你在使用 `dio 2.x`, 使用以下方依赖：
+
+```yaml
 dio_http_cache: ^0.1.4
+# or : (to get the latest update in 2.x)
+dio-http-cache:
+	git:
+		url: git@github.com:hurshi/dio-http-cache.git
+		ref: v2.x
 ```
 
 ### 简单使用
@@ -16,7 +27,7 @@ dio_http_cache: ^0.1.4
 1. 为 dio 添加拦截器：
 
    ```dart
-   dio.interceptors.add(DioCacheManager(CacheConfig()).interceptor);
+   dio.interceptors.add(DioCacheManager(CacheConfig(baseUrl: "http://www.google.com")).interceptor);
    ```
 
 2. 为需要缓存的请求添加 options:

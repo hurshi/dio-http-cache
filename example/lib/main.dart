@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'dart:io';
 
 import 'package:dio/dio.dart';
 import 'package:dio_http_cache/dio_http_cache.dart';
@@ -30,6 +29,7 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
+
   String _content =
       "press to request \nhttps://www.wanandroid.com/article/query/0/json";
   var _url = "article/query/0/json";
@@ -38,8 +38,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
   var _dio = Dio(BaseOptions(
       baseUrl: "https://www.wanandroid.com/",
-      contentType: ContentType.parse(
-          "application/x-www-form-urlencoded; charset=utf-8")))
+      contentType: "application/x-www-form-urlencoded; charset=utf-8"))
     ..interceptors.add(_manager.interceptor)
     ..interceptors.add(LogInterceptor(responseBody: true));
 
@@ -140,19 +139,19 @@ class _MyHomePageState extends State<MyHomePage> {
         ])));
   }
 
-  // set proxy
-  static DefaultHttpClientAdapter _getHttpClientAdapter() {
-    DefaultHttpClientAdapter httpClientAdapter;
-    httpClientAdapter = DefaultHttpClientAdapter();
-    httpClientAdapter.onHttpClientCreate = (HttpClient client) {
-      client.findProxy = (uri) {
-        return 'PROXY 10.0.0.103:8008';
-      };
-      client.badCertificateCallback =
-          (X509Certificate cert, String host, int port) {
-        return true;
-      };
-    };
-    return httpClientAdapter;
-  }
+// set proxy
+//  static DefaultHttpClientAdapter _getHttpClientAdapter() {
+//    DefaultHttpClientAdapter httpClientAdapter;
+//    httpClientAdapter = DefaultHttpClientAdapter();
+//    httpClientAdapter.onHttpClientCreate = (HttpClient client) {
+//      client.findProxy = (uri) {
+//        return 'PROXY 10.0.0.103:8008';
+//      };
+//      client.badCertificateCallback =
+//          (X509Certificate cert, String host, int port) {
+//        return true;
+//      };
+//    };
+//    return httpClientAdapter;
+//  }
 }
