@@ -20,9 +20,9 @@ If you are using `dio 2.x`:
 dio_http_cache: ^0.1.4
 # or : (to get the latest update in 2.x)
 dio-http-cache:
-	git:
-		url: git@github.com:hurshi/dio-http-cache.git
-		ref: v2.x
+  git:
+    url: git@github.com:hurshi/dio-http-cache.git
+    ref: v2.x
 ```
 
 ### QuickStart
