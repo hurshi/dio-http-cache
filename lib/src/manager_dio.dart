@@ -62,7 +62,7 @@ class DioCacheManager {
 
   Response _buildResponse(String data, RequestOptions options) {
     var headers = Headers();
-    options.headers.forEach((k, v) => headers.add(k, v));
+    options.headers.forEach((k, v) => headers.add(k, v ?? ""));
     return Response(
         data: (options.responseType == ResponseType.json)
             ? jsonDecode(data)
