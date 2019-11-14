@@ -39,14 +39,16 @@ class DioCacheManager {
     }
     var responseDataFromCache = await _pullFromCacheBeforeMaxAge(options);
     if (null != responseDataFromCache) {
-      return _buildResponse(responseDataFromCache, options);
+      return _buildResponse(responseDataFromCache?.content,
+          responseDataFromCache?.statusCode, options);
     }
     return options;
   }
 
   _onResponse(Response response) async {
     if (response.request.extra.containsKey(DIO_CACHE_KEY_MAX_AGE) &&
-        response.statusCode == 200) {
+        response.statusCode >= 200 &&
+        response.statusCode < 300) {
       await _pushToCache(response);
     }
     return response;
@@ -56,12 +58,13 @@ class DioCacheManager {
     if (e.request.extra.containsKey(DIO_CACHE_KEY_MAX_AGE)) {
       var responseDataFromCache = await _pullFromCacheBeforeMaxStale(e.request);
       if (null != responseDataFromCache)
-        return _buildResponse(responseDataFromCache, e.request);
+        return _buildResponse(responseDataFromCache?.content,
+            responseDataFromCache?.statusCode, e.request);
     }
     return e;
   }
 
-  Response _buildResponse(String data, RequestOptions options) {
+  Response _buildResponse(String data, int statusCode, RequestOptions options) {
     var headers = Headers();
     options.headers.forEach((k, v) => headers.add(k, v ?? ""));
     return Response(
@@ -70,16 +73,16 @@ class DioCacheManager {
             : data,
         headers: headers,
         extra: options.extra..remove(DIO_CACHE_KEY_MAX_AGE),
-        statusCode: 200);
+        statusCode: statusCode ?? 200);
   }
 
-  Future<String> _pullFromCacheBeforeMaxAge(RequestOptions options) {
+  Future<CacheObj> _pullFromCacheBeforeMaxAge(RequestOptions options) {
     return _manager?.pullFromCacheBeforeMaxAge(
         _getPrimaryKeyFromOptions(options),
         subKey: _getSubKeyFromOptions(options));
   }
 
-  Future<String> _pullFromCacheBeforeMaxStale(RequestOptions options) {
+  Future<CacheObj> _pullFromCacheBeforeMaxStale(RequestOptions options) {
     return _manager?.pullFromCacheBeforeMaxStale(
         _getPrimaryKeyFromOptions(options),
         subKey: _getSubKeyFromOptions(options));

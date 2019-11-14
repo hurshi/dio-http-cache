@@ -11,12 +11,16 @@ class CacheObj {
   @JsonKey(name: "max_stale_date")
   int maxStaleDate;
   String content;
+  int statusCode;
 
-  CacheObj._(this.key, this.subKey, this.content);
+  CacheObj._(this.key, this.subKey, this.content, this.statusCode);
 
   factory CacheObj(String key, String content,
-      {String subKey = "", Duration maxAge, Duration maxStale}) {
-    return CacheObj._(key, subKey, content)
+      {String subKey = "",
+      Duration maxAge,
+      Duration maxStale,
+      int statusCode = 200}) {
+    return CacheObj._(key, subKey, content, statusCode)
       ..maxAge = maxAge
       ..maxStale = maxStale;
   }

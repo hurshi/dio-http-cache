@@ -31,23 +31,39 @@ class DiskCacheStore extends BaseCacheStore {
   final String columnMaxAgeDate = "max_age_date";
   final String columnMaxStaleDate = "max_stale_date";
   final String columnContent = "content";
+  final String statusCode = "statusCode";
 
   Database _db;
+  static const int curDBVersion = 2;
 
   Future<Database> get _database async {
     if (null == _db) {
       var path = await getDatabasesPath();
       await Directory(path).create(recursive: true);
       path = join(path, "${config.databaseName}.db");
-      _db = await openDatabase(path);
-      await _onDatabaseOpen(_db);
+      _db = await openDatabase(path,
+          version: curDBVersion,
+          onConfigure: (db) => _tryFixDbNoVersionBug(db, path),
+          onCreate: _onCreate,
+          onUpgrade: _onUpgrade);
+      await _clearExpired(_db);
     }
     return _db;
   }
 
-  DiskCacheStore(CacheConfig config) : super(config);
+  _tryFixDbNoVersionBug(Database db, String dbPath) async {
+    if ((await db.getVersion()) == 0) {
+      var isTableUserLogExist = await db
+          .rawQuery(
+              "select DISTINCT tbl_name from sqlite_master where tbl_name = '$tableCacheObject'")
+          .then((v) => (null != v && v.length > 0));
+      if (isTableUserLogExist) {
+        await db.setVersion(1);
+      }
+    }
+  }
 
-  _onDatabaseOpen(Database db) async {
+  _onCreate(Database db, int version) async {
     await db.execute('''
       CREATE TABLE IF NOT EXISTS $tableCacheObject ( 
         $columnKey text, 
@@ -55,11 +71,37 @@ class DiskCacheStore extends BaseCacheStore {
         $columnMaxAgeDate integer,
         $columnMaxStaleDate integer,
         $columnContent text,
+        $statusCode integer,
         PRIMARY KEY ($columnKey, $columnSubKey)
         ) 
       ''');
-    await _clearExpired(db);
   }
+
+  _dbUpgradeList() => [
+        // 0 -> 1
+        null,
+        // 1 -> 2
+        "ALTER TABLE $tableCacheObject ADD COLUMN $statusCode integer;",
+      ];
+
+  _onUpgrade(Database db, int oldVersion, int newVersion) async {
+    var mergeLength = _dbUpgradeList().length;
+    if (oldVersion < 0 || oldVersion >= mergeLength) return;
+    await db.transaction((txn) async {
+      var tempVersion = oldVersion;
+      while (tempVersion < newVersion) {
+        if (tempVersion < mergeLength) {
+          var sql = _dbUpgradeList()[tempVersion].trim();
+          if (null != sql && sql.length > 0) {
+            await txn.execute(sql);
+          }
+        }
+        tempVersion++;
+      }
+    });
+  }
+
+  DiskCacheStore(CacheConfig config) : super(config);
 
   @override
   Future<CacheObj> getCacheObj(String key, {String subKey}) async {
@@ -78,8 +120,8 @@ class DiskCacheStore extends BaseCacheStore {
     if (null == db) return false;
     var content = await _encryptCacheStr(obj.content);
     await db.execute(
-        "REPLACE INTO $tableCacheObject($columnKey,$columnSubKey,$columnMaxAgeDate,$columnMaxStaleDate,$columnContent)"
-        " values(\"${obj.key}\",\"${obj.subKey ?? ""}\",${obj.maxAgeDate ?? 0},${obj.maxStaleDate ?? 0},\"$content\")");
+        "REPLACE INTO $tableCacheObject($columnKey,$columnSubKey,$columnMaxAgeDate,$columnMaxStaleDate,$columnContent,$statusCode)"
+        " values(\"${obj.key}\",\"${obj.subKey ?? ""}\",${obj.maxAgeDate ?? 0},${obj.maxStaleDate ?? 0},\"$content\",${obj.statusCode})");
     return true;
   }
 

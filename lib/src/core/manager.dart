@@ -47,20 +47,20 @@ class CacheManager {
     return obj;
   }
 
-  Future<String> pullFromCacheBeforeMaxAge(String key, {String subKey}) async {
+  Future<CacheObj> pullFromCacheBeforeMaxAge(String key,
+      {String subKey}) async {
     var obj = await _pullFromCache(key, subKey: subKey);
     if (null != obj &&
         null != obj.maxAgeDate &&
         obj.maxAgeDate < DateTime.now().millisecondsSinceEpoch) {
       return null;
     }
-    return obj?.content;
+    return obj;
   }
 
-  Future<String> pullFromCacheBeforeMaxStale(String key,
+  Future<CacheObj> pullFromCacheBeforeMaxStale(String key,
       {String subKey}) async {
-    var obj = await _pullFromCache(key, subKey: subKey);
-    return obj?.content;
+    return await _pullFromCache(key, subKey: subKey);
   }
 
   Future<bool> pushToCache(CacheObj obj) {
