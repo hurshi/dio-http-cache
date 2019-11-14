@@ -45,7 +45,8 @@ class DioCacheManager {
   }
 
   _onResponse(Response response) async {
-    if (response.request.extra.containsKey(DIO_CACHE_KEY_MAX_AGE)) {
+    if (response.request.extra.containsKey(DIO_CACHE_KEY_MAX_AGE) &&
+        response.statusCode == 200) {
       await _pushToCache(response);
     }
     return response;

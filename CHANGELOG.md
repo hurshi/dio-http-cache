@@ -1,3 +1,7 @@
+## [0.2.2] - 2019-10-29
+
+* Store cache only when response statusCode equals 200.
+
 ## [0.2.1] - 2019-10-29
 
 * Fix crash for null value in headers
