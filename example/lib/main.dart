@@ -1,157 +1,72 @@
-import 'dart:convert';
-
-import 'package:dio/dio.dart';
-import 'package:dio_http_cache/dio_http_cache.dart';
 import 'package:flutter/material.dart';
+
+import 'panel_cache_manage.dart';
+import 'panel_post.dart';
+import 'tuple.dart';
 
 void main() => runApp(MyApp());
 
 class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    final title = "DioHttpCache Example";
     return MaterialApp(
-      title: 'dio-http-cache',
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
-      ),
-      home: MyHomePage(title: 'dio-http-cache'),
-    );
+        title: title,
+        theme: ThemeData(primarySwatch: Colors.blue),
+        home: MyHomePage(title: title));
   }
 }
 
 class MyHomePage extends StatefulWidget {
   MyHomePage({Key key, this.title}) : super(key: key);
-
   final String title;
 
   @override
   _MyHomePageState createState() => _MyHomePageState();
 }
 
+enum Panel { POST, CACHE_MANAGER }
+
 class _MyHomePageState extends State<MyHomePage> {
-
-  String _content =
-      "press to request \nhttps://www.wanandroid.com/article/query/0/json";
-  var _url = "article/query/0/json";
-  static DioCacheManager _manager =
-      DioCacheManager(CacheConfig(baseUrl: "https://www.wanandroid.com/"));
-
-  var _dio = Dio(BaseOptions(
-      baseUrl: "https://www.wanandroid.com/",
-      contentType: "application/x-www-form-urlencoded; charset=utf-8"))
-    ..interceptors.add(_manager.interceptor)
-    ..interceptors.add(LogInterceptor(responseBody: true));
-
-//    ..httpClientAdapter = _getHttpClientAdapter();
-
-  var _controller = TextEditingController(text: "flutter");
-
-  void _doPost(String keyword) {
-    setState(() {
-      _content = "Requesting $keyword ...";
-    });
-    _dio
-        .post(_url,
-            data: {'k': keyword},
-            options: buildCacheOptions(Duration(hours: 1),
-                subKey: "k=$keyword", forceRefresh: false))
-        .then((response) {
-      setState(() {
-        _content =
-            "StatusCode = ${response.statusCode}\n${jsonEncode(response.data)}";
-      });
-    });
-  }
-
-  void _deleteCacheByPrimaryKey(String url) {
-    _manager.deleteByPrimaryKey(url).then((value) {
-      print(">>> delete result = $value");
-    });
-  }
-
-  void _deleteByPrimaryKeyAndSubKey(String url, {String subKey}) {
-    _manager.deleteByPrimaryKeyAndSubKey(url, subKey: subKey).then((value) {
-      print(">>> delete result = $value");
-    });
-  }
-
-  void _clearExpired() {
-    _manager.clearExpired();
-  }
-
-  void _clearAll() {
-    _manager.clearAll();
-  }
+  Panel panel = Panel.POST;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: AppBar(
+      appBar: AppBar(
           title: Text(widget.title),
-        ),
-        body: Center(
-            child: Column(children: <Widget>[
-          MaterialButton(
-            child: Text("Delete cache by key"),
-            color: Colors.blue,
-            onPressed: () {
-              _deleteCacheByPrimaryKey(_url);
-            },
-          ),
-          MaterialButton(
-            child: Text("Delete cache by key and subkey=flutter"),
-            color: Colors.blue,
-            onPressed: () {
-              _deleteByPrimaryKeyAndSubKey(_url, subKey: "k=flutter");
-            },
-          ),
-          MaterialButton(
-            child: Text("clear all cache"),
-            color: Colors.blue,
-            onPressed: () {
-              _clearAll();
-            },
-          ),
-          Row(children: <Widget>[
-            Expanded(
-                child: TextField(
-                    controller: _controller,
-                    decoration: InputDecoration(
-                      labelText: "request params",
-                    ))),
-            IconButton(
-                icon: Icon(
-                  Icons.check_circle,
-                  color: Colors.blue,
-                ),
-                iconSize: 35,
-                onPressed: () {
-                  _doPost(_controller.text);
-                })
-          ]),
-          Expanded(
-            child: SingleChildScrollView(
-                child: Text(
-              '$_content',
-              style: TextStyle(color: Colors.blueGrey),
-            )),
-          )
-        ])));
+          actions: <Widget>[_buildHomePageActionButtons(context)]),
+      body: getPanel(),
+      floatingActionButton: FloatingActionButton(
+          child: Icon(Icons.cached),
+          onPressed: () => setState(() => panel =
+              (panel == Panel.POST) ? Panel.CACHE_MANAGER : Panel.POST)),
+    );
   }
 
-// set proxy
-//  static DefaultHttpClientAdapter _getHttpClientAdapter() {
-//    DefaultHttpClientAdapter httpClientAdapter;
-//    httpClientAdapter = DefaultHttpClientAdapter();
-//    httpClientAdapter.onHttpClientCreate = (HttpClient client) {
-//      client.findProxy = (uri) {
-//        return 'PROXY 10.0.0.103:8008';
-//      };
-//      client.badCertificateCallback =
-//          (X509Certificate cert, String host, int port) {
-//        return true;
-//      };
-//    };
-//    return httpClientAdapter;
-//  }
+  Widget getPanel() {
+    switch (panel) {
+      case Panel.POST:
+        return PostPanel();
+      case Panel.CACHE_MANAGER:
+        return CacheManagerPanel();
+    }
+    return null;
+  }
+
+  Widget _buildHomePageActionButtons(BuildContext context) {
+    List<Pair<String, Function()>> choices = [
+      Pair("POST", () => setState(() => panel = Panel.POST)),
+      Pair("Cache Manager", () => setState(() => panel = Panel.CACHE_MANAGER)),
+    ];
+    return PopupMenuButton<Pair<String, Function()>>(
+        onSelected: (p) => p.i1(),
+        child: Padding(
+            padding: EdgeInsets.all(10),
+            child: Icon(Icons.menu, color: Colors.white)),
+        itemBuilder: (BuildContext context) => choices
+            .map((choice) => PopupMenuItem<Pair<String, Function()>>(
+                value: choice, child: Text(choice.i0)))
+            .toList());
+  }
 }
