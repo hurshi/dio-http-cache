@@ -96,7 +96,8 @@ class DioCacheManager {
         _getPrimaryKeyFromOptions(options), jsonEncode(response.data),
         subKey: _getSubKeyFromOptions(options),
         maxAge: maxAge,
-        maxStale: maxStale);
+        maxStale: maxStale,
+        statusCode: response.statusCode);
     return _manager?.pushToCache(obj);
   }
 
@@ -152,7 +153,7 @@ class DioCacheManager {
 
   Uri _getUriByPath(String baseUrl, String path,
       {dynamic data, Map<String, dynamic> queryParameters}) {
-    if (!path.startsWith(new RegExp(r"https?:"))) {
+    if (!path.startsWith(RegExp(r"https?:"))) {
       assert(null != baseUrl && baseUrl.length > 0);
     }
     return RequestOptions(

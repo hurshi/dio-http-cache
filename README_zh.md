@@ -8,7 +8,7 @@
 ### 添加依赖
 
 ```yaml
-dio_http_cache: ^0.2.2
+dio_http_cache: ^0.2.3
 ```
 
 如果你在使用 `dio 2.x`, 使用以下方依赖：

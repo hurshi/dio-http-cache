@@ -13,6 +13,8 @@ class PostPanel extends StatefulWidget {
 
 class _PostPanelState extends State<PostPanel> {
   String _content = "Hello ~";
+
+//  var _url = "https://www.v2ex.com/generate_204"; //204 test
   var _url = "article/query/0/json";
   var _paramsController;
   var _urlController;
@@ -35,7 +37,7 @@ class _PostPanelState extends State<PostPanel> {
                 subKey: paramsAvailable ? "k=$params" : null,
                 forceRefresh: false))
         .then((response) => setState(() => _content = "Cached:\n\n"
-            "key: ${DioHelper.baseUrl}$_url\n\n"
+            "key: ${_url.startsWith(RegExp(r"https?:")) ? "" : DioHelper.baseUrl}$_url\n\n"
             "${paramsAvailable ? 'subkey: k=$params\n\n' : ""}"
             "StatusCode: ${response.statusCode}\n\nc"
             "ontent: ${jsonEncode(response.data)}"))

@@ -1,4 +1,10 @@
-## [0.2.2] - 2019-10-29
+## [0.2.3] - 2019-11-14
+
+* Store cache only when response statusCode in 200 ~ 300.
+* Support for store statusCode.
+* improve example codes.
+
+## [0.2.2] - 2019-11-14
 
 * Store cache only when response statusCode equals 200.
 
