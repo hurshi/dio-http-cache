@@ -1,15 +1,20 @@
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:dio/dio.dart';
 import 'package:dio_http_cache/src/core/config.dart';
 import 'package:dio_http_cache/src/core/manager.dart';
 import 'package:dio_http_cache/src/core/obj.dart';
 
+const DIO_CACHE_KEY_TRY_CACHE = "dio_cache_try_cache";
 const DIO_CACHE_KEY_MAX_AGE = "dio_cache_max_age";
 const DIO_CACHE_KEY_MAX_STALE = "dio_cache_max_stale";
 const DIO_CACHE_KEY_PRIMARY_KEY = "dio_cache_primary_key";
 const DIO_CACHE_KEY_SUB_KEY = "dio_cache_sub_key";
 const DIO_CACHE_KEY_FORCE_REFRESH = "dio_cache_force_refresh";
+
+typedef _ParseHeadCallback = void Function(
+    Duration _maxAge, Duration _maxStale);
 
 class DioCacheManager {
   CacheManager _manager;
@@ -31,7 +36,7 @@ class DioCacheManager {
   }
 
   _onRequest(RequestOptions options) async {
-    if (!options.extra.containsKey(DIO_CACHE_KEY_MAX_AGE)) {
+    if ((options.extra[DIO_CACHE_KEY_TRY_CACHE] ?? false) != true) {
       return options;
     }
     if (true == options.extra[DIO_CACHE_KEY_FORCE_REFRESH]) {
@@ -46,7 +51,7 @@ class DioCacheManager {
   }
 
   _onResponse(Response response) async {
-    if (response.request.extra.containsKey(DIO_CACHE_KEY_MAX_AGE) &&
+    if ((response.request.extra[DIO_CACHE_KEY_TRY_CACHE] ?? false) == true &&
         response.statusCode >= 200 &&
         response.statusCode < 300) {
       await _pushToCache(response);
@@ -55,7 +60,7 @@ class DioCacheManager {
   }
 
   _onError(DioError e) async {
-    if (e.request.extra.containsKey(DIO_CACHE_KEY_MAX_AGE)) {
+    if ((e.request.extra[DIO_CACHE_KEY_TRY_CACHE] ?? false) == true) {
       var responseDataFromCache = await _pullFromCacheBeforeMaxStale(e.request);
       if (null != responseDataFromCache)
         return _buildResponse(responseDataFromCache?.content,
@@ -72,7 +77,7 @@ class DioCacheManager {
             ? jsonDecode(data)
             : data,
         headers: headers,
-        extra: options.extra..remove(DIO_CACHE_KEY_MAX_AGE),
+        extra: options.extra..remove(DIO_CACHE_KEY_TRY_CACHE),
         statusCode: statusCode ?? 200);
   }
 
@@ -92,6 +97,13 @@ class DioCacheManager {
     RequestOptions options = response.request;
     Duration maxAge = options.extra[DIO_CACHE_KEY_MAX_AGE];
     Duration maxStale = options.extra[DIO_CACHE_KEY_MAX_STALE];
+    if (null == maxAge) {
+      _tryParseHead(response, (_maxAge, _maxStale) {
+        maxAge = _maxAge;
+        maxStale = _maxStale;
+      });
+    }
+    if (null == maxAge) return Future.value(false);
     var obj = CacheObj(
         _getPrimaryKeyFromOptions(options), jsonEncode(response.data),
         subKey: _getSubKeyFromOptions(options),
@@ -99,6 +111,52 @@ class DioCacheManager {
         maxStale: maxStale,
         statusCode: response.statusCode);
     return _manager?.pushToCache(obj);
+  }
+
+  // try to get maxAge and maxStale from http headers
+  void _tryParseHead(Response response, _ParseHeadCallback callback) {
+    Duration _maxAge;
+    Duration _maxStale;
+    var cacheControl = response.headers.value(HttpHeaders.cacheControlHeader);
+    if (null != cacheControl) {
+      // try parse maxAge and maxStale in cacheControl
+      var parameters = HeaderValue.parse(cacheControl,
+              parameterSeparator: ",", valueSeparator: "=")
+          .parameters;
+      if (parameters.containsKey("s-maxage")) {
+        var sMaxAge = int.tryParse(parameters["s-maxage"]);
+        if (null != sMaxAge && sMaxAge >= 0) {
+          _maxAge = Duration(seconds: sMaxAge);
+        }
+      } else if (parameters.containsKey("max-age")) {
+        var sMaxAge = int.tryParse(parameters["max-age"]);
+        if (null != sMaxAge && sMaxAge >= 0) {
+          _maxAge = Duration(seconds: sMaxAge);
+        }
+      }
+
+      if (parameters.containsKey("max-stale")) {
+        var sMaxStale = int.tryParse(parameters["max-stale"]);
+        if (null != sMaxStale && sMaxStale >= 0) {
+          _maxStale = Duration(seconds: sMaxStale);
+        }
+      }
+    } else {
+      // try parse maxAge in expires
+      var expires = response.headers.value(HttpHeaders.expiresHeader);
+      if (null != expires && expires.length > 4) {
+        DateTime endTime;
+        try {
+          endTime = HttpDate.parse(expires).toLocal();
+        } catch (e) {
+          print(e);
+        }
+        if (null != endTime && endTime.compareTo(DateTime.now()) >= 0) {
+          _maxAge = endTime.difference(DateTime.now());
+        }
+      }
+    }
+    callback(_maxAge, _maxStale);
   }
 
   String _getPrimaryKeyFromOptions(RequestOptions options) {

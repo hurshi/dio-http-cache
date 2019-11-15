@@ -1,7 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
-import 'dio_helper.dart';
+import '../dio_helper.dart';
 
 class CacheManagerPanel extends StatefulWidget {
   @override
@@ -11,7 +11,7 @@ class CacheManagerPanel extends StatefulWidget {
 enum _Mode { clearByKey, clearByKeyAndSubKey, clearAll }
 
 class _CacheManagerPanelState extends State<CacheManagerPanel> {
-  _Mode _mode = _Mode.clearByKey;
+  _Mode _mode = _Mode.clearAll;
   var _url = "article/query/0/json";
   var _keyController = TextEditingController();
   var _subKeyController = TextEditingController();
