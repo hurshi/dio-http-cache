@@ -35,6 +35,6 @@ class _GetPanelState extends State<GetPanel> {
   @override
   Widget build(BuildContext context) {
     return PanelHelper.buildNormalPanel(
-        "Normal post example", _urlController, null, _content, _doRequest);
+        "Normal GET example", _urlController, null, _content, _doRequest);
   }
 }

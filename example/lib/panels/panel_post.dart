@@ -41,7 +41,7 @@ class _PostPanelState extends State<PostPanel> {
 
   @override
   Widget build(BuildContext context) {
-    return PanelHelper.buildNormalPanel("Normal post example", _urlController,
+    return PanelHelper.buildNormalPanel("Normal POST example", _urlController,
         _paramsController, _content, _doRequest);
   }
 }

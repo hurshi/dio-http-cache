@@ -1,7 +1,9 @@
 import 'package:dio/dio.dart';
 import 'package:dio_http_cache/src/manager_dio.dart';
 
-Options buildCacheOptionsStrategyByService(
+/// try to get maxAge and maxStale from response headers.
+/// local settings will always overview the value get from service.
+Options buildServiceCacheOptions(
         {Options options,
         Duration maxStale,
         String primaryKey,
@@ -14,6 +16,7 @@ Options buildCacheOptionsStrategyByService(
         subKey: subKey,
         forceRefresh: forceRefresh);
 
+/// build a normal cache options
 Options buildCacheOptions(Duration maxAge,
         {Duration maxStale,
         String primaryKey,
@@ -28,7 +31,8 @@ Options buildCacheOptions(Duration maxAge,
         maxStale: maxStale,
         forceRefresh: forceRefresh);
 
-// if ( null == maxAge ) : try get maxAge from response headers
+/// if null==maxAge, will try to get maxAge and maxStale from response headers.
+/// local settings will always overview the value get from service.
 Options buildConfigurableCacheOptions(
     {Options options,
     Duration maxAge,

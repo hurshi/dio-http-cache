@@ -26,7 +26,7 @@ class _PostGetLetServicePanelState extends State<PostGetLetServicePanel> {
     setState(() => _content = {"Requesting": _url});
     DioHelper.getDio()
         .get(_urlController.text,
-            options: buildCacheOptionsStrategyByService(forceRefresh: false))
+            options: buildServiceCacheOptions(forceRefresh: false))
         .then((response) => setState(
             () => _content = PanelHelper.getPrintContent(_url, null, response)))
         .catchError((onError, stackTrace) => setState(
@@ -36,7 +36,7 @@ class _PostGetLetServicePanelState extends State<PostGetLetServicePanel> {
   @override
   Widget build(BuildContext context) {
     return PanelHelper.buildNormalPanel(
-        "Cache strategy by service, try read maxAge and maxStale from http head from service.",
+        "Cache strategy by service, try to read maxAge and maxStale from response http head.",
         _urlController,
         null,
         _content,

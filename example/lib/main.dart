@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'panels/cache_manage.dart';
 import 'panels/panel_204.dart';
 import 'panels/panel_get.dart';
-import 'panels/panel_get_let_service.dart';
+import 'panels/panel_get_from_service.dart';
 import 'panels/panel_post.dart';
 import 'tuple.dart';
 
@@ -28,7 +28,7 @@ class MyHomePage extends StatefulWidget {
   _MyHomePageState createState() => _MyHomePageState();
 }
 
-enum Panel { CACHE_MANAGER, POST, POST_204, GET_LET_SERVICE, GET }
+enum Panel { CACHE_MANAGER, POST, POST_204, GET_FROM_SERVICE, GET }
 
 class _MyHomePageState extends State<MyHomePage> {
   Panel panel = Panel.POST;
@@ -36,15 +36,10 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-          title: Text(widget.title),
-          actions: <Widget>[_buildHomePageActionButtons(context)]),
-      body: getPanel(),
-//      floatingActionButton: FloatingActionButton(
-//          child: Icon(Icons.cached),
-//          onPressed: () => setState(() => panel =
-//              (panel == Panel.POST) ? Panel.CACHE_MANAGER : Panel.POST)),
-    );
+        appBar: AppBar(
+            title: Text(widget.title),
+            actions: <Widget>[_buildHomePageActionButtons(context)]),
+        body: getPanel());
   }
 
   Widget getPanel() {
@@ -57,7 +52,7 @@ class _MyHomePageState extends State<MyHomePage> {
         return PostPanel();
       case Panel.POST_204:
         return Post204Panel();
-      case Panel.GET_LET_SERVICE:
+      case Panel.GET_FROM_SERVICE:
         return PostGetLetServicePanel();
     }
     return null;
@@ -67,10 +62,10 @@ class _MyHomePageState extends State<MyHomePage> {
     List<Pair<String, Function()>> choices = [
       Pair("Cache Manager", () => setState(() => panel = Panel.CACHE_MANAGER)),
       Pair("POST", () => setState(() => panel = Panel.POST)),
-      Pair("GET", () => setState(() => panel = Panel.GET)),
       Pair("POST 204", () => setState(() => panel = Panel.POST_204)),
-      Pair("POST Let Service",
-          () => setState(() => panel = Panel.GET_LET_SERVICE)),
+      Pair("GET", () => setState(() => panel = Panel.GET)),
+      Pair("GET from service",
+          () => setState(() => panel = Panel.GET_FROM_SERVICE)),
     ];
     return PopupMenuButton<Pair<String, Function()>>(
         onSelected: (p) => p.i1(),

@@ -98,7 +98,7 @@ class DioCacheManager {
     Duration maxAge = options.extra[DIO_CACHE_KEY_MAX_AGE];
     Duration maxStale = options.extra[DIO_CACHE_KEY_MAX_STALE];
     if (null == maxAge) {
-      _tryParseHead(response, (_maxAge, _maxStale) {
+      _tryParseHead(response, maxStale, (_maxAge, _maxStale) {
         maxAge = _maxAge;
         maxStale = _maxStale;
       });
@@ -114,35 +114,30 @@ class DioCacheManager {
   }
 
   // try to get maxAge and maxStale from http headers
-  void _tryParseHead(Response response, _ParseHeadCallback callback) {
+  void _tryParseHead(
+      Response response, Duration maxStale, _ParseHeadCallback callback) {
     Duration _maxAge;
-    Duration _maxStale;
     var cacheControl = response.headers.value(HttpHeaders.cacheControlHeader);
     if (null != cacheControl) {
-      // try parse maxAge and maxStale in cacheControl
-      var parameters = HeaderValue.parse(cacheControl,
-              parameterSeparator: ",", valueSeparator: "=")
-          .parameters;
-      if (parameters.containsKey("s-maxage")) {
-        var sMaxAge = int.tryParse(parameters["s-maxage"]);
-        if (null != sMaxAge && sMaxAge >= 0) {
-          _maxAge = Duration(seconds: sMaxAge);
-        }
-      } else if (parameters.containsKey("max-age")) {
-        var sMaxAge = int.tryParse(parameters["max-age"]);
-        if (null != sMaxAge && sMaxAge >= 0) {
-          _maxAge = Duration(seconds: sMaxAge);
-        }
+      // try to get maxAge and maxStale from cacheControl
+      var parameters;
+      try {
+        parameters = HeaderValue.parse(cacheControl,
+                parameterSeparator: ",", valueSeparator: "=")
+            .parameters;
+      } catch (e) {
+        print(e);
       }
-
-      if (parameters.containsKey("max-stale")) {
-        var sMaxStale = int.tryParse(parameters["max-stale"]);
-        if (null != sMaxStale && sMaxStale >= 0) {
-          _maxStale = Duration(seconds: sMaxStale);
-        }
+      _maxAge = _tryGetDurationFromMap(parameters, "s-maxage");
+      if (null == _maxAge) {
+        _maxAge = _tryGetDurationFromMap(parameters, "max-age");
+      }
+      // if maxStale has valued, don't get max-stale anymore.
+      if (null == maxStale) {
+        maxStale = _tryGetDurationFromMap(parameters, "max-stale");
       }
     } else {
-      // try parse maxAge in expires
+      // try to get maxAge from expires
       var expires = response.headers.value(HttpHeaders.expiresHeader);
       if (null != expires && expires.length > 4) {
         DateTime endTime;
@@ -156,7 +151,17 @@ class DioCacheManager {
         }
       }
     }
-    callback(_maxAge, _maxStale);
+    callback(_maxAge, maxStale);
+  }
+
+  Duration _tryGetDurationFromMap(Map<String, String> parameters, String key) {
+    if (null != parameters && parameters.containsKey(key)) {
+      var value = int.tryParse(parameters[key]);
+      if (null != value && value >= 0) {
+        return Duration(seconds: value);
+      }
+    }
+    return null;
   }
 
   String _getPrimaryKeyFromOptions(RequestOptions options) {

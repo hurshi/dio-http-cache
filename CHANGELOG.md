@@ -1,8 +1,14 @@
+## [0.2.4] - 2019-11-15
+
+* Support for get maxAge and maxStale from response headers.
+* Improve example codes.
+
+
 ## [0.2.3] - 2019-11-14
 
 * Store cache only when response statusCode in 200 ~ 300.
 * Support for store statusCode.
-* improve example codes.
+* Improve example codes.
 
 ## [0.2.2] - 2019-11-14
 
@@ -14,7 +20,7 @@
 
 ## [0.2.0] - 2019-09-20
 
-* support for dio 3.0
+* Support for dio 3.0
 
 ## [0.1.4] - 2019-09-17
 
@@ -43,7 +49,7 @@
 ## [0.1.0] - 2019-07-14
 
 * This is a pre-release version.
-* support disk cache.
-* support memory cache.
-* support key and subKey.
-* support maxAge and maxStale.
+* Support disk cache.
+* Support memory cache.
+* Support key and subKey.
+* Support maxAge and maxStale.
