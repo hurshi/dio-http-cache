@@ -11,7 +11,7 @@ Inspired by [flutter_cache_manager](https://github.com/renefloor/flutter_cache_m
 ### Add Dependency
 
 ```yaml
-dio_http_cache: ^0.2.3
+dio_http_cache: ^0.2.4
 ```
 
 If you are using `dio 2.x`:
@@ -54,9 +54,9 @@ dio-http-cache:
       buildCacheOptions(Duration(days: 7), subKey: "page=1")
       ```
    
-   3. **maxAge:** the only required param, set the cache time;
+   3. **maxAge:** set the cache time. If the value is null or not setted, it will try to get maxAge and maxStale from response headers.
    
-   4. **maxStale:** set stale time. When an error (like 500,404) occurs before maxStale, try to return cache .
+   4. **maxStale:** set stale time. When an error (like 500,404) occurs before maxStale, try to return cache.
    
       ```dart
       buildCacheOptions(Duration(days: 7), maxStale: Duration(days: 10))

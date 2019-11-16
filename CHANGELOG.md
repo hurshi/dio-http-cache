@@ -1,8 +1,7 @@
-## [0.2.4] - 2019-11-15
+## [0.2.4] - 2019-11-16
 
 * Support for get maxAge and maxStale from response headers.
 * Improve example codes.
-
 
 ## [0.2.3] - 2019-11-14
 
