@@ -25,16 +25,16 @@ abstract class BaseCacheStore {
 }
 
 class DiskCacheStore extends BaseCacheStore {
-  final String tableCacheObject = "cache_dio";
-  final String columnKey = "key";
-  final String columnSubKey = "subKey";
-  final String columnMaxAgeDate = "max_age_date";
-  final String columnMaxStaleDate = "max_stale_date";
-  final String columnContent = "content";
-  final String statusCode = "statusCode";
+  final String _tableCacheObject = "cache_dio";
+  final String _columnKey = "key";
+  final String _columnSubKey = "subKey";
+  final String _columnMaxAgeDate = "max_age_date";
+  final String _columnMaxStaleDate = "max_stale_date";
+  final String _columnContent = "content";
+  final String _columnStatusCode = "statusCode";
 
   Database _db;
-  static const int curDBVersion = 2;
+  static const int _curDBVersion = 2;
 
   Future<Database> get _database async {
     if (null == _db) {
@@ -42,7 +42,7 @@ class DiskCacheStore extends BaseCacheStore {
       await Directory(path).create(recursive: true);
       path = join(path, "${config.databaseName}.db");
       _db = await openDatabase(path,
-          version: curDBVersion,
+          version: _curDBVersion,
           onConfigure: (db) => _tryFixDbNoVersionBug(db, path),
           onCreate: _onCreate,
           onUpgrade: _onUpgrade);
@@ -55,7 +55,7 @@ class DiskCacheStore extends BaseCacheStore {
     if ((await db.getVersion()) == 0) {
       var isTableUserLogExist = await db
           .rawQuery(
-              "select DISTINCT tbl_name from sqlite_master where tbl_name = '$tableCacheObject'")
+              "select DISTINCT tbl_name from sqlite_master where tbl_name = '$_tableCacheObject'")
           .then((v) => (null != v && v.length > 0));
       if (isTableUserLogExist) {
         await db.setVersion(1);
@@ -65,14 +65,14 @@ class DiskCacheStore extends BaseCacheStore {
 
   _onCreate(Database db, int version) async {
     await db.execute('''
-      CREATE TABLE IF NOT EXISTS $tableCacheObject ( 
-        $columnKey text, 
-        $columnSubKey text, 
-        $columnMaxAgeDate integer,
-        $columnMaxStaleDate integer,
-        $columnContent text,
-        $statusCode integer,
-        PRIMARY KEY ($columnKey, $columnSubKey)
+      CREATE TABLE IF NOT EXISTS $_tableCacheObject ( 
+        $_columnKey text, 
+        $_columnSubKey text, 
+        $_columnMaxAgeDate integer,
+        $_columnMaxStaleDate integer,
+        $_columnContent text,
+        $_columnStatusCode integer,
+        PRIMARY KEY ($_columnKey, $_columnSubKey)
         ) 
       ''');
   }
@@ -81,7 +81,7 @@ class DiskCacheStore extends BaseCacheStore {
         // 0 -> 1
         null,
         // 1 -> 2
-        "ALTER TABLE $tableCacheObject ADD COLUMN $statusCode integer;",
+        "ALTER TABLE $_tableCacheObject ADD COLUMN $_columnStatusCode integer;",
       ];
 
   _onUpgrade(Database db, int oldVersion, int newVersion) async {
@@ -107,9 +107,9 @@ class DiskCacheStore extends BaseCacheStore {
   Future<CacheObj> getCacheObj(String key, {String subKey}) async {
     var db = await _database;
     if (null == db) return null;
-    var where = "$columnKey=\"$key\"";
-    if (null != subKey) where += " and $columnSubKey=\"$subKey\"";
-    var resultList = await db.query(tableCacheObject, where: where);
+    var where = "$_columnKey=\"$key\"";
+    if (null != subKey) where += " and $_columnSubKey=\"$subKey\"";
+    var resultList = await db.query(_tableCacheObject, where: where);
     if (null == resultList || resultList.length <= 0) return null;
     return await _decryptCacheObj(CacheObj.fromJson(resultList[0]));
   }
@@ -120,7 +120,7 @@ class DiskCacheStore extends BaseCacheStore {
     if (null == db) return false;
     var content = await _encryptCacheStr(obj.content);
     await db.execute(
-        "REPLACE INTO $tableCacheObject($columnKey,$columnSubKey,$columnMaxAgeDate,$columnMaxStaleDate,$columnContent,$statusCode)"
+        "REPLACE INTO $_tableCacheObject($_columnKey,$_columnSubKey,$_columnMaxAgeDate,$_columnMaxStaleDate,$_columnContent,$_columnStatusCode)"
         " values(\"${obj.key}\",\"${obj.subKey ?? ""}\",${obj.maxAgeDate ?? 0},${obj.maxStaleDate ?? 0},\"$content\",${obj.statusCode})");
     return true;
   }
@@ -129,9 +129,9 @@ class DiskCacheStore extends BaseCacheStore {
   Future<bool> delete(String key, {String subKey}) async {
     var db = await _database;
     if (null == db) return false;
-    var where = "$columnKey=\"$key\"";
-    if (null != subKey) where += " and $columnSubKey=\"$subKey\"";
-    return 0 != await db.delete(tableCacheObject, where: where);
+    var where = "$_columnKey=\"$key\"";
+    if (null != subKey) where += " and $_columnSubKey=\"$subKey\"";
+    return 0 != await db.delete(_tableCacheObject, where: where);
   }
 
   @override
@@ -143,17 +143,17 @@ class DiskCacheStore extends BaseCacheStore {
   Future<bool> _clearExpired(Database db) async {
     if (null == db) return false;
     var now = DateTime.now().millisecondsSinceEpoch;
-    var where1 = "$columnMaxStaleDate > 0 and $columnMaxStaleDate < $now";
-    var where2 = "$columnMaxStaleDate <= 0 and $columnMaxAgeDate < $now";
+    var where1 = "$_columnMaxStaleDate > 0 and $_columnMaxStaleDate < $now";
+    var where2 = "$_columnMaxStaleDate <= 0 and $_columnMaxAgeDate < $now";
     return 0 !=
-        await db.delete(tableCacheObject, where: "( $where1 ) or ( $where2 )");
+        await db.delete(_tableCacheObject, where: "( $where1 ) or ( $where2 )");
   }
 
   @override
   Future<bool> clearAll() async {
     var db = await _database;
     if (null == db) return false;
-    return 0 != await db.delete(tableCacheObject);
+    return 0 != await db.delete(_tableCacheObject);
   }
 
   Future<CacheObj> _decryptCacheObj(CacheObj obj) async {
