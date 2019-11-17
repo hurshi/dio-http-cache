@@ -1,3 +1,5 @@
+[![Pub](https://img.shields.io/pub/v/dio_http_cache.svg?style=flat)](https://pub.dev/packages/dio_http_cache) 
+
 ### 简介
 
 * Dio-http-cache 是 Flutter 的 http 缓存库，为 [Dio](https://github.com/flutterchina/dio) 设计，就像 Android 中的 [RxCache](https://github.com/VictorAlbertos/RxCache) 一样。
@@ -8,18 +10,8 @@
 ### 添加依赖
 
 ```yaml
-dio_http_cache: ^0.2.4
-```
-
-如果你在使用 `dio 2.x`, 使用以下方依赖：
-
-```yaml
-dio_http_cache: ^0.1.4
-# or : (to get the latest update in 2.x)
-dio-http-cache:
-  git:
-    url: git@github.com:hurshi/dio-http-cache.git
-    ref: v2.x
+dependencies:
+	dio_http_cache: ^0.2.x #latest version
 ```
 
 ### 简单使用
