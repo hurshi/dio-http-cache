@@ -35,7 +35,7 @@ class _CacheManagerPanelState extends State<CacheManagerPanel> {
                       .subtitle
                       .copyWith(color: Theme.of(context).accentColor)),
               DropdownButton<_Mode>(
-                  value: _Mode.clearByKey,
+                  value: _mode,
                   onChanged: (value) => setState(() => _mode = value),
                   items: <_Mode>[
                     _Mode.clearByKey,
