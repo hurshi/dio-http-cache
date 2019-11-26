@@ -49,7 +49,7 @@ dependencies:
       ```
    
 2. **CacheConfig 可以配置一些默认参数：**
-   1. ***encrypt / dectrypt:*** 这2个必须组合使用，实现磁盘缓存数据的加密。
+   1. ***encrypt / dectrypt:*** 这2个必须组合使用，实现磁盘缓存数据的加密。也可以在这里实现数据的压缩。
    2. ***DefaultMaxAge:*** 默认值为 Duration( day: 7 ), 在上面 buildCacheOption 中如果没有配置 MaxAge 有错误，或者自己实现了 option 而没有配置 MaxAge, 会使用这个默认值；
    3. ***DefalutMaxStale:*** 和 DefaultMaxAge 类似；
    4. ***DatabaseName:*** 配置数据库名；
