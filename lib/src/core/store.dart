@@ -1,5 +1,4 @@
 import 'dart:collection';
-import 'dart:convert';
 import 'dart:io';
 
 import 'package:dio_http_cache/src/core/config.dart';
@@ -32,9 +31,10 @@ class DiskCacheStore extends BaseCacheStore {
   final String _columnMaxStaleDate = "max_stale_date";
   final String _columnContent = "content";
   final String _columnStatusCode = "statusCode";
+  final String _columnHeaders = "headers";
 
   Database _db;
-  static const int _curDBVersion = 2;
+  static const int _curDBVersion = 3;
 
   Future<Database> get _database async {
     if (null == _db) {
@@ -63,25 +63,32 @@ class DiskCacheStore extends BaseCacheStore {
     }
   }
 
-  _onCreate(Database db, int version) async {
-    await db.execute('''
+  _getCreateTableSql() => '''
       CREATE TABLE IF NOT EXISTS $_tableCacheObject ( 
         $_columnKey text, 
         $_columnSubKey text, 
         $_columnMaxAgeDate integer,
         $_columnMaxStaleDate integer,
-        $_columnContent text,
+        $_columnContent BLOB,
         $_columnStatusCode integer,
+        $_columnHeaders BLOB,
         PRIMARY KEY ($_columnKey, $_columnSubKey)
         ) 
-      ''');
+      ''';
+
+  _onCreate(Database db, int version) async {
+    await db.execute(_getCreateTableSql());
   }
 
-  _dbUpgradeList() => [
+  List<List<String>> _dbUpgradeList() => [
         // 0 -> 1
         null,
         // 1 -> 2
-        "ALTER TABLE $_tableCacheObject ADD COLUMN $_columnStatusCode integer;",
+        [
+          "ALTER TABLE $_tableCacheObject ADD COLUMN $_columnStatusCode integer;"
+        ],
+        // 2 -> 3 : Change $_columnContent from text to BLOB
+        ["DROP TABLE IF EXISTS $_tableCacheObject;", _getCreateTableSql()],
       ];
 
   _onUpgrade(Database db, int oldVersion, int newVersion) async {
@@ -91,9 +98,14 @@ class DiskCacheStore extends BaseCacheStore {
       var tempVersion = oldVersion;
       while (tempVersion < newVersion) {
         if (tempVersion < mergeLength) {
-          var sql = _dbUpgradeList()[tempVersion].trim();
-          if (null != sql && sql.length > 0) {
-            await txn.execute(sql);
+          var sqlList = _dbUpgradeList()[tempVersion];
+          if (null != sqlList && sqlList.length > 0) {
+            sqlList.forEach((sql) async {
+              sql = sql.trim();
+              if (null != sql && sql.length > 0) {
+                await txn.execute(sql);
+              }
+            });
           }
         }
         tempVersion++;
@@ -119,9 +131,19 @@ class DiskCacheStore extends BaseCacheStore {
     var db = await _database;
     if (null == db) return false;
     var content = await _encryptCacheStr(obj.content);
-    await db.execute(
-        "REPLACE INTO $_tableCacheObject($_columnKey,$_columnSubKey,$_columnMaxAgeDate,$_columnMaxStaleDate,$_columnContent,$_columnStatusCode)"
-        " values(\"${obj.key}\",\"${obj.subKey ?? ""}\",${obj.maxAgeDate ?? 0},${obj.maxStaleDate ?? 0},\"$content\",${obj.statusCode})");
+    var headers = await _encryptCacheStr(obj.headers);
+    await db.insert(
+        _tableCacheObject,
+        {
+          _columnKey: obj.key,
+          _columnSubKey: obj.subKey ?? "",
+          _columnMaxAgeDate: obj.maxAgeDate ?? 0,
+          _columnMaxStaleDate: obj.maxStaleDate ?? 0,
+          _columnContent: content,
+          _columnStatusCode: obj.statusCode,
+          _columnHeaders: headers
+        },
+        conflictAlgorithm: ConflictAlgorithm.replace);
     return true;
   }
 
@@ -157,21 +179,25 @@ class DiskCacheStore extends BaseCacheStore {
   }
 
   Future<CacheObj> _decryptCacheObj(CacheObj obj) async {
-    if (null != config.decrypt) {
-      obj.content = await config.decrypt(obj.content);
-    } else {
-      obj.content = utf8.decode(base64.decode(obj.content));
-    }
+    obj.content = await _decryptCacheStr(obj.content);
+    obj.headers = await _decryptCacheStr(obj.headers);
     return obj;
   }
 
-  Future<String> _encryptCacheStr(String str) async {
-    if (null != config.encrypt) {
-      str = await config.encrypt(str);
-    } else {
-      str = base64.encode(utf8.encode(str));
+  Future<List<int>> _decryptCacheStr(List<int> bytes) async {
+    if (null == bytes) return null;
+    if (null != config.decrypt) {
+      bytes = await config.decrypt(bytes);
     }
-    return str;
+    return bytes;
+  }
+
+  Future<List<int>> _encryptCacheStr(List<int> bytes) async {
+    if (null == bytes) return null;
+    if (null != config.encrypt) {
+      bytes = await config.encrypt(bytes);
+    }
+    return bytes;
   }
 }
 

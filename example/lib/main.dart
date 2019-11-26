@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'panels/cache_manage.dart';
 import 'panels/panel_204.dart';
 import 'panels/panel_get.dart';
+import 'panels/panel_get_bytes.dart';
 import 'panels/panel_get_from_service.dart';
 import 'panels/panel_post.dart';
 import 'tuple.dart';
@@ -28,7 +29,7 @@ class MyHomePage extends StatefulWidget {
   _MyHomePageState createState() => _MyHomePageState();
 }
 
-enum Panel { CACHE_MANAGER, POST, POST_204, GET_FROM_SERVICE, GET }
+enum Panel { CACHE_MANAGER, POST, POST_204, GET_FROM_SERVICE, GET, GET_BYTES }
 
 class _MyHomePageState extends State<MyHomePage> {
   Panel panel = Panel.POST;
@@ -54,6 +55,8 @@ class _MyHomePageState extends State<MyHomePage> {
         return Post204Panel();
       case Panel.GET_FROM_SERVICE:
         return PostGetLetServicePanel();
+      case Panel.GET_BYTES:
+        return GetBytesPanel();
     }
     return null;
   }
@@ -66,6 +69,7 @@ class _MyHomePageState extends State<MyHomePage> {
       Pair("GET", () => setState(() => panel = Panel.GET)),
       Pair("GET from service",
           () => setState(() => panel = Panel.GET_FROM_SERVICE)),
+      Pair("GET byte array", () => setState(() => panel = Panel.GET_BYTES)),
     ];
     return PopupMenuButton<Pair<String, Function()>>(
         onSelected: (p) => p.i1(),

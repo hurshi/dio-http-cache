@@ -9,9 +9,10 @@ part of 'obj.dart';
 CacheObj _$CacheObjFromJson(Map json) {
   return CacheObj(
     json['key'] as String,
-    json['content'] as String,
+    (json['content'] as List)?.map((e) => e as int)?.toList(),
     subKey: json['subKey'] as String,
     statusCode: json['statusCode'] as int,
+    headers: (json['headers'] as List)?.map((e) => e as int)?.toList(),
   )
     ..maxAgeDate = json['max_age_date'] as int
     ..maxStaleDate = json['max_stale_date'] as int;
@@ -24,4 +25,5 @@ Map<String, dynamic> _$CacheObjToJson(CacheObj instance) => <String, dynamic>{
       'max_stale_date': instance.maxStaleDate,
       'content': instance.content,
       'statusCode': instance.statusCode,
+      'headers': instance.headers,
     };

@@ -26,7 +26,11 @@ class PanelHelper {
 
   static Map<String, String> getPrintError(
       dynamic onError, dynamic stackTrace) {
-    return {"Error occur": "", "onError": onError, "stackTrace": stackTrace};
+    return {
+      "Error occur": "",
+      "onError": onError.toString(),
+      "stackTrace": stackTrace.toString()
+    };
   }
 
   static Widget buildNormalPanel(

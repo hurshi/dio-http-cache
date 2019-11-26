@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:json_annotation/json_annotation.dart';
 
 part 'obj.g.dart';
@@ -10,17 +12,20 @@ class CacheObj {
   int maxAgeDate;
   @JsonKey(name: "max_stale_date")
   int maxStaleDate;
-  String content;
+  List<int> content;
   int statusCode;
+  List<int> headers;
 
-  CacheObj._(this.key, this.subKey, this.content, this.statusCode);
+  CacheObj._(
+      this.key, this.subKey, this.content, this.statusCode, this.headers);
 
-  factory CacheObj(String key, String content,
+  factory CacheObj(String key, List<int> content,
       {String subKey = "",
       Duration maxAge,
       Duration maxStale,
-      int statusCode = 200}) {
-    return CacheObj._(key, subKey, content, statusCode)
+      int statusCode = 200,
+      List<int> headers}) {
+    return CacheObj._(key, subKey, content, statusCode, headers)
       ..maxAge = maxAge
       ..maxStale = maxStale;
   }

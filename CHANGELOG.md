@@ -1,3 +1,10 @@
+## [0.2.5] - 2019-11-26
+
+* Support ResponseType.bytes.
+* Cache all headers.
+* Change cache data type from TEXT to BLOB.
+* WARNING: Because of the change in the database data type, when upgrading to this version, the data cached by the previous version will be erased.
+
 ## [0.2.4] - 2019-11-16
 
 * Support for get maxAge and maxStale from response headers.

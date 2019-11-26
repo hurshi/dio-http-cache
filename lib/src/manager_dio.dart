@@ -44,8 +44,8 @@ class DioCacheManager {
     }
     var responseDataFromCache = await _pullFromCacheBeforeMaxAge(options);
     if (null != responseDataFromCache) {
-      return _buildResponse(responseDataFromCache?.content,
-          responseDataFromCache?.statusCode, options);
+      return _buildResponse(
+          responseDataFromCache, responseDataFromCache?.statusCode, options);
     }
     return options;
   }
@@ -63,19 +63,30 @@ class DioCacheManager {
     if ((e.request.extra[DIO_CACHE_KEY_TRY_CACHE] ?? false) == true) {
       var responseDataFromCache = await _pullFromCacheBeforeMaxStale(e.request);
       if (null != responseDataFromCache)
-        return _buildResponse(responseDataFromCache?.content,
+        return _buildResponse(responseDataFromCache,
             responseDataFromCache?.statusCode, e.request);
     }
     return e;
   }
 
-  Response _buildResponse(String data, int statusCode, RequestOptions options) {
-    var headers = Headers();
-    options.headers.forEach((k, v) => headers.add(k, v ?? ""));
+  Response _buildResponse(
+      CacheObj obj, int statusCode, RequestOptions options) {
+    Headers headers;
+    if (null != obj.headers) {
+      headers = Headers.fromMap((Map<String, List<dynamic>>.from(
+              jsonDecode(utf8.decode(obj.headers))))
+          .map((k, v) => MapEntry(k, List<String>.from(v))));
+    }
+    if (null == headers) {
+      headers = Headers();
+      options.headers.forEach((k, v) => headers.add(k, v ?? ""));
+    }
+    dynamic data = obj.content;
+    if (options.responseType != ResponseType.bytes) {
+      data = jsonDecode(utf8.decode(data));
+    }
     return Response(
-        data: (options.responseType == ResponseType.json)
-            ? jsonDecode(data)
-            : data,
+        data: data,
         headers: headers,
         extra: options.extra..remove(DIO_CACHE_KEY_TRY_CACHE),
         statusCode: statusCode ?? 200);
@@ -104,12 +115,19 @@ class DioCacheManager {
       });
     }
     if (null == maxAge) return Future.value(false);
-    var obj = CacheObj(
-        _getPrimaryKeyFromOptions(options), jsonEncode(response.data),
+
+    List<int> data;
+    if (options.responseType == ResponseType.bytes) {
+      data = response.data;
+    } else {
+      data = utf8.encode(jsonEncode(response.data));
+    }
+    var obj = CacheObj(_getPrimaryKeyFromOptions(options), data,
         subKey: _getSubKeyFromOptions(options),
         maxAge: maxAge,
         maxStale: maxStale,
-        statusCode: response.statusCode);
+        statusCode: response.statusCode,
+        headers: utf8.encode(jsonEncode(response.headers.map)));
     return _manager?.pushToCache(obj);
   }
 

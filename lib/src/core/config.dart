@@ -1,5 +1,5 @@
-typedef Future<String> Encrypt(String str);
-typedef Future<String> Decrypt(String str);
+typedef Future<List<int>> Encrypt(List<int> str);
+typedef Future<List<int>> Decrypt(List<int> str);
 
 class CacheConfig {
   final Duration defaultMaxAge;

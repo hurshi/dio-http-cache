@@ -66,7 +66,7 @@ dependencies:
    
 2. **Use "CacheConfig" to config default params**
 
-   1. **encrypt / decrypt:**  These two must be used together to encrypt the disk cache data, otherwise use base64 as default.
+   1. **encrypt / decrypt:**  These two must be used together to encrypt the disk cache data.
    2. **DefaultMaxAge:**  use `Duration(day:7)` as default.
    3. **DefaultaMaxStale:** similar with DefaultMaxAge.
    4. **DatabaseName:** database name.
