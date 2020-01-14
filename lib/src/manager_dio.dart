@@ -140,8 +140,10 @@ class DioCacheManager {
       // try to get maxAge and maxStale from cacheControl
       var parameters;
       try {
-        parameters = HeaderValue.parse(cacheControl,
-                parameterSeparator: ",", valueSeparator: "=")
+        parameters = HeaderValue.parse(
+                HttpHeaders.cacheControlHeader + ": " + cacheControl,
+                parameterSeparator: ",",
+                valueSeparator: "=")
             .parameters;
       } catch (e) {
         print(e);
