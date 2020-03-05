@@ -1,3 +1,8 @@
+## [0.2.6] - 2020-02-05
+
+* Fix issue [#30](https://github.com/hurshi/dio-http-cache/issues/30), default maxAge ignored.
+* Fix issue [#24](https://github.com/hurshi/dio-http-cache/issues/24), Resolve the crash parsing of the Response head.
+
 ## [0.2.5] - 2019-11-26
 
 * Support ResponseType.bytes.
