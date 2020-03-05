@@ -114,8 +114,6 @@ class DioCacheManager {
         maxStale = _maxStale;
       });
     }
-    if (null == maxAge) return Future.value(false);
-
     List<int> data;
     if (options.responseType == ResponseType.bytes) {
       data = response.data;

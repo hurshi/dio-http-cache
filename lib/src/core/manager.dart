@@ -70,6 +70,9 @@ class CacheManager {
     if (null == obj.maxAgeDate || obj.maxAgeDate <= 0) {
       obj.maxAge = _config.defaultMaxAge;
     }
+    if (null == obj.maxAgeDate || obj.maxAgeDate <= 0) {
+      return Future.value(false);
+    }
     if ((null == obj.maxStaleDate || obj.maxStaleDate <= 0) &&
         null != _config.defaultMaxStale) {
       obj.maxStale = _config.defaultMaxStale;
