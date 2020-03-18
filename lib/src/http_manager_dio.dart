@@ -46,7 +46,6 @@ class HttpCacheManager {
     if (null != responseDataFromCache) {
       final headers = jsonDecode(utf8.decode(responseDataFromCache.headers));
       options.headers[HttpHeaders.ifNoneMatchHeader] = headers[HttpHeaders.etagHeader]?.join(",");
-      options.headers[HttpHeaders.ifModifiedSinceHeader] = headers[HttpHeaders.lastModifiedHeader]?.join(",");
     }
     return options;
 
@@ -57,7 +56,7 @@ class HttpCacheManager {
       return response;
     }
     if (response.statusCode >= 200 && response.statusCode < 300) {
-      if (_checkCacheAvailable(response.headers)) {
+      if (null != response.headers[HttpHeaders.etagHeader]) {
         await _pushToCache(response);
       }
       return response;
@@ -77,10 +76,6 @@ class HttpCacheManager {
             responseDataFromCache?.statusCode, e.request);
     }
     return e;
-  }
-
-  bool _checkCacheAvailable(Headers headers) {
-    return headers[HttpHeaders.etagHeader] != null && headers[HttpHeaders.lastModifiedHeader] != null;
   }
 
   Response _buildResponse(
