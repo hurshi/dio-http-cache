@@ -183,9 +183,9 @@ class DioCacheManager {
   }
 
   String _getPrimaryKeyFromOptions(RequestOptions options) {
-    return options.extra.containsKey(DIO_CACHE_KEY_PRIMARY_KEY)
+    return "${options.method??"N"}-${options.extra.containsKey(DIO_CACHE_KEY_PRIMARY_KEY)
         ? options.extra[DIO_CACHE_KEY_PRIMARY_KEY]
-        : _getPrimaryKeyFromUri(options.uri);
+        : _getPrimaryKeyFromUri(options.uri)}";
   }
 
   String _getSubKeyFromOptions(RequestOptions options) {
