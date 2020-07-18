@@ -1,4 +1,3 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 import '../dio_helper.dart';
@@ -14,6 +13,7 @@ class _CacheManagerPanelState extends State<CacheManagerPanel> {
   _Mode _mode = _Mode.clearAll;
   var _url = "article/query/0/json";
   var _keyController = TextEditingController();
+  var _requestMethodController = TextEditingController();
   var _subKeyController = TextEditingController();
 
   @override
@@ -47,6 +47,8 @@ class _CacheManagerPanelState extends State<CacheManagerPanel> {
                               value: value, child: Text(getTxtByMode(value))))
                       .toList()),
               Container(height: 20),
+              for (var w in getRequestMethodViews(context)) w,
+              Container(height: 20),
               for (var w in getKeyViews(context)) w,
               Container(height: 20),
               for (var w in getSubKeyViews(context)) w,
@@ -74,11 +76,13 @@ class _CacheManagerPanelState extends State<CacheManagerPanel> {
       DioHelper.getCacheManager().clearAll().then(resultPrinter);
     } else if (_mode == _Mode.clearByKey) {
       DioHelper.getCacheManager()
-          .deleteByPrimaryKey(_keyController.text)
+          .deleteByPrimaryKey(_keyController.text,
+              requestMethod: _requestMethodController.text)
           .then(resultPrinter);
     } else if (_mode == _Mode.clearByKeyAndSubKey) {
       DioHelper.getCacheManager()
           .deleteByPrimaryKeyAndSubKey(_keyController.text,
+              requestMethod: _requestMethodController.text,
               subKey: _subKeyController.text)
           .then(resultPrinter);
     }
@@ -88,11 +92,27 @@ class _CacheManagerPanelState extends State<CacheManagerPanel> {
     Scaffold.of(context).showSnackBar(SnackBar(content: Text(msg)));
   }
 
+  List<Widget> getRequestMethodViews(BuildContext context) {
+    if (_mode == _Mode.clearAll) return [];
+    _requestMethodController.text = "POST";
+    return [
+      Text("2. RequestMethod:",
+          style: Theme.of(context)
+              .textTheme
+              .subtitle
+              .copyWith(color: Theme.of(context).accentColor)),
+      TextField(
+          controller: _requestMethodController,
+          style: Theme.of(context).textTheme.body2),
+      Container(height: 20),
+    ];
+  }
+
   List<Widget> getKeyViews(BuildContext context) {
     if (_mode == _Mode.clearAll) return [];
     _keyController.text = "${DioHelper.baseUrl}$_url";
     return [
-      Text("2. Key:",
+      Text("3. Key:",
           style: Theme.of(context)
               .textTheme
               .subtitle
@@ -107,7 +127,7 @@ class _CacheManagerPanelState extends State<CacheManagerPanel> {
     if (_mode == _Mode.clearAll || _mode == _Mode.clearByKey) return [];
     _subKeyController.text = "k=flutter";
     return [
-      Text("3. Subkey:",
+      Text("4. Subkey:",
           style: Theme.of(context)
               .textTheme
               .subtitle
@@ -123,9 +143,9 @@ class _CacheManagerPanelState extends State<CacheManagerPanel> {
     if (_mode == _Mode.clearAll)
       return "2";
     else if (_mode == _Mode.clearByKey)
-      return "3";
-    else
       return "4";
+    else
+      return "5";
   }
 
   String getTxtByMode(_Mode mode) {

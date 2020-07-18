@@ -20,10 +20,12 @@ class DioCacheManager {
   CacheManager _manager;
   InterceptorsWrapper _interceptor;
   String _baseUrl;
+  String _defaultRequestMethod;
 
   DioCacheManager(CacheConfig config) {
     _manager = CacheManager(config);
     _baseUrl = config.baseUrl;
+    _defaultRequestMethod = config.defaultRequestMethod;
   }
 
   /// interceptor for http cache.
@@ -183,9 +185,21 @@ class DioCacheManager {
   }
 
   String _getPrimaryKeyFromOptions(RequestOptions options) {
-    return "${options.method??"N"}-${options.extra.containsKey(DIO_CACHE_KEY_PRIMARY_KEY)
+    var primaryKey = options.extra.containsKey(DIO_CACHE_KEY_PRIMARY_KEY)
         ? options.extra[DIO_CACHE_KEY_PRIMARY_KEY]
-        : _getPrimaryKeyFromUri(options.uri)}";
+        : _getPrimaryKeyFromUri(options.uri);
+
+    return "${_getRequestMethod(options.method)}-$primaryKey";
+  }
+
+  String _getRequestMethod(String requestMethod) {
+    if (null != requestMethod && requestMethod.length > 0) {
+      return requestMethod.toUpperCase();
+    }
+    if (null != _defaultRequestMethod && _defaultRequestMethod.length > 0) {
+      return _defaultRequestMethod.toUpperCase();
+    }
+    return "DEFAULT_METHOD";
   }
 
   String _getSubKeyFromOptions(RequestOptions options) {
@@ -200,29 +214,35 @@ class DioCacheManager {
       "${data?.toString()}_${uri?.query}";
 
   /// delete local cache by primaryKey and optional subKey
-  Future<bool> delete(String primaryKey, {String subKey}) =>
-      _manager?.delete(primaryKey, subKey: subKey);
+  Future<bool> delete(String primaryKey,
+          {String requestMethod, String subKey}) =>
+      _manager?.delete("${_getRequestMethod(requestMethod)}-$primaryKey",
+          subKey: subKey);
 
   /// no matter what subKey is, delete local cache if primary matched.
-  Future<bool> deleteByPrimaryKeyWithUri(Uri uri) =>
-      delete(_getPrimaryKeyFromUri(uri));
+  Future<bool> deleteByPrimaryKeyWithUri(Uri uri, {String requestMethod}) =>
+      delete(_getPrimaryKeyFromUri(uri), requestMethod: requestMethod);
 
-  Future<bool> deleteByPrimaryKey(String path) =>
-      deleteByPrimaryKeyWithUri(_getUriByPath(_baseUrl, path));
+  Future<bool> deleteByPrimaryKey(String path, {String requestMethod}) =>
+      deleteByPrimaryKeyWithUri(_getUriByPath(_baseUrl, path),
+          requestMethod: requestMethod);
 
   /// delete local cache when both primaryKey and subKey matched.
   Future<bool> deleteByPrimaryKeyAndSubKeyWithUri(Uri uri,
-          {String subKey, dynamic data}) =>
+          {String requestMethod, String subKey, dynamic data}) =>
       delete(_getPrimaryKeyFromUri(uri),
+          requestMethod: requestMethod,
           subKey: subKey ?? _getSubKeyFromUri(uri, data: data));
 
   Future<bool> deleteByPrimaryKeyAndSubKey(String path,
-          {Map<String, dynamic> queryParameters,
+          {String requestMethod,
+          Map<String, dynamic> queryParameters,
           String subKey,
           dynamic data}) =>
       deleteByPrimaryKeyAndSubKeyWithUri(
           _getUriByPath(_baseUrl, path,
               data: data, queryParameters: queryParameters),
+          requestMethod: requestMethod,
           subKey: subKey,
           data: data);
 

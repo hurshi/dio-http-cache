@@ -73,6 +73,7 @@ dependencies:
    5. **SkipMemoryCache:** false defalut.
    6. **SkipDiskCache:** false default.
    7. **MaxMemoryCacheCount:** 100 defalut.
+   8. **DefaultRequestMethod**: use "POST" as default, it will be used in `delete caches`.
 
 3. **How to clear expired cache**
 
@@ -86,14 +87,14 @@ dependencies:
 
       ```dart
       // Automatically parses primarykey from path
-      _dioCacheManager.deleteByPrimaryKey(path); 
+      _dioCacheManager.deleteByPrimaryKey(path, requestMethod: "POST"); 
       ```
 
    2. Delete local cache when both primaryKey and subKey matched.
 
       ```dart
       // delete local cache when both primaryKey and subKey matched.
-      _dioCacheManager.deleteByPrimaryKeyAndSubKey(path); 
+      _dioCacheManager.deleteByPrimaryKeyAndSubKey(path, requestMethod: "GET"); 
       ```
 
       **INPORTANT:** If you have additional parameters when requesting the http interface, you must take them with it, for example:
@@ -102,21 +103,21 @@ dependencies:
       _dio.get(_url, queryParameters: {'k': keyword}, 
       	options: buildCacheOptions(Duration(hours: 1)))
       //delete the cache:
-      _dioCacheManager.deleteByPrimaryKeyAndSubKey(_url, queryParameters:{'k': keyword}); 
+      _dioCacheManager.deleteByPrimaryKeyAndSubKey(_url, requestMethod: "GET", queryParameters:{'k': keyword}); 
       ```
 
       ```dart
       _dio.post(_url, data: {'k': keyword}, 
       	options: buildCacheOptions(Duration(hours: 1)))
       //delete the cache:
-      _dioCacheManager.deleteByPrimaryKeyAndSubKey(_url, data:{'k': keyword}); 
+      _dioCacheManager.deleteByPrimaryKeyAndSubKey(_url, requestMethod: "POST", data:{'k': keyword}); 
       ```
 
    3. Delete local cache by primaryKey and optional subKey if you know your primarykey and subkey exactly.
 
       ```dart
       // delete local cache by primaryKey and optional subKey
-      _dioCacheManager.delete(primaryKey,{subKey});
+      _dioCacheManager.delete(primaryKey,{subKey,requestMethod});
       ```
 
 5. **How to clear All caches** (expired or not)

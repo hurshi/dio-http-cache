@@ -1,3 +1,8 @@
+## [0.2.8] - 2020-07-18
+
+* Fix issue [#37](https://github.com/hurshi/dio-http-cache/issues/41), fix request method in primaryKey, and add request method in delete caches.
+* WARNING: request method is needed when you delete one cache, or set defaultRequestMethod in CacheConfig.
+
 ## [0.2.7] - 2020-06-04
 
 * Fix issue [#37](https://github.com/hurshi/dio-http-cache/issues/30), add request method to primaryKey.

@@ -6,6 +6,7 @@ class CacheConfig {
   final Duration defaultMaxStale;
   final String databaseName;
   final String baseUrl;
+  final String defaultRequestMethod;
 
   final bool skipMemoryCache;
   final bool skipDiskCache;
@@ -18,6 +19,7 @@ class CacheConfig {
   CacheConfig(
       {this.defaultMaxAge = const Duration(days: 7),
       this.defaultMaxStale,
+      this.defaultRequestMethod = "POST",
       this.databaseName = "DioCache",
       this.baseUrl,
       this.skipDiskCache = false,
