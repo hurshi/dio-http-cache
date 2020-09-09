@@ -12,6 +12,7 @@ const DIO_CACHE_KEY_MAX_STALE = "dio_cache_max_stale";
 const DIO_CACHE_KEY_PRIMARY_KEY = "dio_cache_primary_key";
 const DIO_CACHE_KEY_SUB_KEY = "dio_cache_sub_key";
 const DIO_CACHE_KEY_FORCE_REFRESH = "dio_cache_force_refresh";
+const DIO_CACHE_HEADER_KEY_DATA_SOURCE = "dio_cache_header_key_data_source";
 
 typedef _ParseHeadCallback = void Function(
     Duration _maxAge, Duration _maxStale);
@@ -83,6 +84,8 @@ class DioCacheManager {
       headers = Headers();
       options.headers.forEach((k, v) => headers.add(k, v ?? ""));
     }
+    // add flag
+    headers.set(DIO_CACHE_HEADER_KEY_DATA_SOURCE, true);
     dynamic data = obj.content;
     if (options.responseType != ResponseType.bytes) {
       data = jsonDecode(utf8.decode(data));
