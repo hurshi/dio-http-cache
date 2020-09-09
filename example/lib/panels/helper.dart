@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:dio/dio.dart';
+import 'package:dio_http_cache/dio_http_cache.dart';
 import 'package:flutter/material.dart';
 
 import '../dio_helper.dart';
@@ -15,6 +16,11 @@ class PanelHelper {
     };
     if (null != subKey && subKey.length > 0) {
       result.addAll({"subKey": subKey});
+    }
+    if (null != response.headers.value(DIO_CACHE_HEADER_KEY_DATA_SOURCE)) {
+      result.addAll({"data source": "data come from cache"});
+    } else {
+      result.addAll({"data source": "data come from net"});
     }
     result.addAll({
       "statusCode": "${response.statusCode}",

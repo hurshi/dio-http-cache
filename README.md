@@ -69,11 +69,12 @@ dependencies:
    1. **encrypt / decrypt:**  These two must be used together to encrypt the disk cache data, you can also zip data here.
    2. **DefaultMaxAge:**  use `Duration(day:7)` as default.
    3. **DefaultaMaxStale:** similar with DefaultMaxAge.
-   4. **DatabaseName:** database name.
-   5. **SkipMemoryCache:** false defalut.
-   6. **SkipDiskCache:** false default.
-   7. **MaxMemoryCacheCount:** 100 defalut.
-   8. **DefaultRequestMethod**: use "POST" as default, it will be used in `delete caches`.
+   4. **DatabasePath:** database path.
+   5. **DatabaseName:** database name.
+   6. **SkipMemoryCache:** false defalut.
+   7. **SkipDiskCache:** false default.
+   8. **MaxMemoryCacheCount:** 100 defalut.
+   9. **DefaultRequestMethod**: use "POST" as default, it will be used in `delete caches`.
 
 3. **How to clear expired cache**
 
@@ -125,6 +126,17 @@ dependencies:
    ```dart
    _dioCacheManager.clearAll();
    ```
+   
+6. **How to know if the data come from Cache**
+
+   ```dart
+   if (null != response.headers.value(DIO_CACHE_HEADER_KEY_DATA_SOURCE)) {
+		// data come from cache
+   } else {
+		// data come from net
+   }
+   ```
+
 
 ###  Example for maxAge and maxStale
 

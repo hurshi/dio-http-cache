@@ -38,7 +38,10 @@ class DiskCacheStore extends BaseCacheStore {
 
   Future<Database> get _database async {
     if (null == _db) {
-      var path = await getDatabasesPath();
+      var path = config.databasePath;
+      if (null == path || path.length <= 0) {
+        path = await getDatabasesPath();
+      }
       await Directory(path).create(recursive: true);
       path = join(path, "${config.databaseName}.db");
       _db = await openDatabase(path,

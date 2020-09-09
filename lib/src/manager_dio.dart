@@ -85,7 +85,7 @@ class DioCacheManager {
       options.headers.forEach((k, v) => headers.add(k, v ?? ""));
     }
     // add flag
-    headers.set(DIO_CACHE_HEADER_KEY_DATA_SOURCE, true);
+    headers.add(DIO_CACHE_HEADER_KEY_DATA_SOURCE, "from_cache");
     dynamic data = obj.content;
     if (options.responseType != ResponseType.bytes) {
       data = jsonDecode(utf8.decode(data));

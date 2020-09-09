@@ -1,3 +1,7 @@
+## [0.2.next] - 2020-09-xx
+* Support database path custom config.
+* Add flag in Response headers to distinguish whether the data is coming from the cache.
+
 ## [0.2.8] - 2020-07-18
 
 * Fix issue [#37](https://github.com/hurshi/dio-http-cache/issues/41), fix request method in primaryKey, and add request method in delete caches.

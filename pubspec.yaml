@@ -23,3 +23,7 @@ dev_dependencies:
   flutter_test:
     sdk: flutter
   build_runner: ^1.6.6
+
+#flutter:
+#  module:
+#    androidX: true
