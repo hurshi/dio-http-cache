@@ -66,15 +66,16 @@ dependencies:
    
 2. **Use "CacheConfig" to config default params**
 
-   1. **encrypt / decrypt:**  These two must be used together to encrypt the disk cache data, you can also zip data here.
-   2. **DefaultMaxAge:**  use `Duration(day:7)` as default.
-   3. **DefaultaMaxStale:** similar with DefaultMaxAge.
-   4. **DatabasePath:** database path.
-   5. **DatabaseName:** database name.
-   6. **SkipMemoryCache:** false defalut.
-   7. **SkipDiskCache:** false default.
-   8. **MaxMemoryCacheCount:** 100 defalut.
-   9. **DefaultRequestMethod**: use "POST" as default, it will be used in `delete caches`.
+   1. **baseUrl: ** it’s optional; If you don't have set baseUrl in CacheConfig, when you call `deleteCache`, you need provide full path like `"https://www.google.com/search?q=hello"`, but not just `"search?q=hello"`.
+   2. **encrypt / decrypt:**  these two must be used together to encrypt the disk cache data, you can also zip data here.
+   3. **defaultMaxAge:**  use `Duration(day:7)` as default.
+   4. **defaultaMaxStale:** similar with DefaultMaxAge.
+   5. **databasePath:** database path.
+   6. **databaseName:** database name.
+   7. **skipMemoryCache:** false defalut.
+   8. **skipDiskCache:** false default.
+   9. **maxMemoryCacheCount:** 100 defalut.
+   10. **defaultRequestMethod**: use "POST" as default, it will be used in `delete caches`.
 
 3. **How to clear expired cache**
 
