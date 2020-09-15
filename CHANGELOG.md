@@ -1,4 +1,4 @@
-## [0.2.next] - 2020-09-xx
+## [0.2.9] - 2020-09-15
 * Support database path custom config.
 * Add flag in Response headers to distinguish whether the data is coming from the cache.
 
