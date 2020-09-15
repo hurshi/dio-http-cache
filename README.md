@@ -66,7 +66,7 @@ dependencies:
    
 2. **Use "CacheConfig" to config default params**
 
-   1. **baseUrl: ** it’s optional; If you don't have set baseUrl in CacheConfig, when you call `deleteCache`, you need provide full path like `"https://www.google.com/search?q=hello"`, but not just `"search?q=hello"`.
+   1. **baseUrl:** it’s optional; If you don't have set baseUrl in CacheConfig, when you call `deleteCache`, you need provide full path like `"https://www.google.com/search?q=hello"`, but not just `"search?q=hello"`.
    2. **encrypt / decrypt:**  these two must be used together to encrypt the disk cache data, you can also zip data here.
    3. **defaultMaxAge:**  use `Duration(day:7)` as default.
    4. **defaultaMaxStale:** similar with DefaultMaxAge.
