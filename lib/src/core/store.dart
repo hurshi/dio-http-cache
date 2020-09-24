@@ -8,9 +8,7 @@ import 'package:quiver/cache.dart';
 import 'package:sqflite/sqflite.dart';
 
 abstract class BaseCacheStore {
-  CacheConfig config;
-
-  BaseCacheStore(this.config);
+  BaseCacheStore();
 
   Future<CacheObj> getCacheObj(String key, {String subKey});
 
@@ -24,6 +22,10 @@ abstract class BaseCacheStore {
 }
 
 class DiskCacheStore extends BaseCacheStore {
+  final String _databasePath;
+  final String _databaseName;
+  final Encrypt _encrypt;
+  final Decrypt _decrypt;
   final String _tableCacheObject = "cache_dio";
   final String _columnKey = "key";
   final String _columnSubKey = "subKey";
@@ -38,12 +40,12 @@ class DiskCacheStore extends BaseCacheStore {
 
   Future<Database> get _database async {
     if (null == _db) {
-      var path = config.databasePath;
+      var path = _databasePath;
       if (null == path || path.length <= 0) {
         path = await getDatabasesPath();
       }
       await Directory(path).create(recursive: true);
-      path = join(path, "${config.databaseName}.db");
+      path = join(path, "$_databaseName.db");
       _db = await openDatabase(path,
           version: _curDBVersion,
           onConfigure: (db) => _tryFixDbNoVersionBug(db, path),
@@ -116,7 +118,9 @@ class DiskCacheStore extends BaseCacheStore {
     });
   }
 
-  DiskCacheStore(CacheConfig config) : super(config);
+  DiskCacheStore(
+      this._databasePath, this._databaseName, this._encrypt, this._decrypt)
+      : super();
 
   @override
   Future<CacheObj> getCacheObj(String key, {String subKey}) async {
@@ -189,31 +193,32 @@ class DiskCacheStore extends BaseCacheStore {
 
   Future<List<int>> _decryptCacheStr(List<int> bytes) async {
     if (null == bytes) return null;
-    if (null != config.decrypt) {
-      bytes = await config.decrypt(bytes);
+    if (null != _decrypt) {
+      bytes = await _decrypt(bytes);
     }
     return bytes;
   }
 
   Future<List<int>> _encryptCacheStr(List<int> bytes) async {
     if (null == bytes) return null;
-    if (null != config.encrypt) {
-      bytes = await config.encrypt(bytes);
+    if (null != _encrypt) {
+      bytes = await _encrypt(bytes);
     }
     return bytes;
   }
 }
 
 class MemoryCacheStore extends BaseCacheStore {
+  final int _maxMemoryCacheCount;
   MapCache<String, CacheObj> _mapCache;
   Map<String, List<String>> _keys;
 
-  MemoryCacheStore(CacheConfig config) : super(config) {
+  MemoryCacheStore(this._maxMemoryCacheCount) : super() {
     _initMap();
   }
 
   _initMap() {
-    _mapCache = MapCache.lru(maximumSize: config.maxMemoryCacheCount);
+    _mapCache = MapCache.lru(maximumSize: _maxMemoryCacheCount);
     _keys = HashMap();
   }
 

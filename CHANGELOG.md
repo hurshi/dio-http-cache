@@ -1,3 +1,6 @@
+## [0.2.10] - 2020-09-24
+* Support for custom disk storage.
+
 ## [0.2.9] - 2020-09-15
 * Support database path custom config.
 * Add flag in Response headers to distinguish whether the data is coming from the cache.

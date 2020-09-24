@@ -76,6 +76,7 @@ dependencies:
    8. **skipDiskCache:** false default.
    9. **maxMemoryCacheCount:** 100 defalut.
    10. **defaultRequestMethod**: use "POST" as default, it will be used in `delete caches`.
+   11. **diskStore**: custom disk storage.
 
 3. **How to clear expired cache**
 
