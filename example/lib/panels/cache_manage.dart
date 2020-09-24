@@ -1,3 +1,4 @@
+import 'package:dio_http_cache/dio_http_cache.dart';
 import 'package:flutter/material.dart';
 
 import '../dio_helper.dart';
@@ -8,6 +9,40 @@ class CacheManagerPanel extends StatefulWidget {
 }
 
 enum _Mode { clearByKey, clearByKeyAndSubKey, clearAll }
+
+
+class MyDiskStore implements ICacheStore {
+  @override
+  Future<bool> clearAll() {
+    // TODO: implement clearAll
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<bool> clearExpired() {
+    // TODO: implement clearExpired
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<bool> delete(String key, {String subKey}) {
+    // TODO: implement delete
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<CacheObj> getCacheObj(String key, {String subKey}) {
+    // TODO: implement getCacheObj
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<bool> setCacheObj(CacheObj obj) {
+    // TODO: implement setCacheObj
+    throw UnimplementedError();
+  }
+}
+
 
 class _CacheManagerPanelState extends State<CacheManagerPanel> {
   _Mode _mode = _Mode.clearAll;

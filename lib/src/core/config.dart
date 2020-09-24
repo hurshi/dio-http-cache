@@ -1,4 +1,4 @@
-import 'package:dio_http_cache/src/core/store.dart';
+import 'package:dio_http_cache/src/store/store_impl.dart';
 
 typedef Future<List<int>> Encrypt(List<int> str);
 typedef Future<List<int>> Decrypt(List<int> str);
@@ -18,7 +18,7 @@ class CacheConfig {
 
   final Encrypt encrypt;
   final Decrypt decrypt;
-  final BaseCacheStore diskStore;
+  final ICacheStore diskStore;
 
   CacheConfig(
       {this.defaultMaxAge = const Duration(days: 7),
