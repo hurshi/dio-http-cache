@@ -114,8 +114,8 @@ class CacheManager {
   }
 
   Future<bool> _getCacheFutureResult(
-      MemoryCacheStore memoryCacheStore,
-      DiskCacheStore diskCacheStore,
+      ICacheStore memoryCacheStore,
+      ICacheStore diskCacheStore,
       Future<bool> memoryCacheFuture,
       Future<bool> diskCacheFuture) async {
     var result1 = (null == memoryCacheStore) ? true : (await memoryCacheFuture);
