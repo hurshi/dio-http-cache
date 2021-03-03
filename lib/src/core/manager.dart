@@ -10,10 +10,10 @@ import 'package:sqflite/utils/utils.dart';
 
 class CacheManager {
   CacheConfig _config;
-  ICacheStore _diskCacheStore;
-  ICacheStore _memoryCacheStore;
-  MD5 _md5;
-  Utf8Encoder _utf8encoder;
+  ICacheStore? _diskCacheStore;
+  ICacheStore? _memoryCacheStore;
+  late Hash _md5;
+  late Utf8Encoder _utf8encoder;
 
   CacheManager(this._config) {
     _md5 = md5;
@@ -26,7 +26,7 @@ class CacheManager {
       _memoryCacheStore = MemoryCacheStore(_config.maxMemoryCacheCount);
   }
 
-  Future<CacheObj> _pullFromCache(String key, {String subKey}) async {
+  Future<CacheObj?> _pullFromCache(String key, {String? subKey}) async {
     key = _convertMd5(key);
     if (null != subKey) subKey = _convertMd5(subKey);
     var obj = await _memoryCacheStore?.getCacheObj(key, subKey: subKey);
@@ -36,15 +36,15 @@ class CacheManager {
     }
     if (null != obj) {
       var now = DateTime.now().millisecondsSinceEpoch;
-      if (null != obj.maxStaleDate && obj.maxStaleDate > 0) {
+      if (null != obj.maxStaleDate && obj.maxStaleDate! > 0) {
         //if maxStaleDate exist, Remove it if maxStaleDate expired.
-        if (obj.maxStaleDate < now) {
+        if (obj.maxStaleDate! < now) {
           await delete(key, subKey: subKey);
           return null;
         }
       } else {
         //if maxStaleDate NOT exist, Remove it if maxAgeDate expired.
-        if (obj.maxAgeDate < now) {
+        if (obj.maxAgeDate! < now) {
           await delete(key, subKey: subKey);
           return null;
         }
@@ -53,33 +53,33 @@ class CacheManager {
     return obj;
   }
 
-  Future<CacheObj> pullFromCacheBeforeMaxAge(String key,
-      {String subKey}) async {
+  Future<CacheObj?> pullFromCacheBeforeMaxAge(String key,
+      {String? subKey}) async {
     var obj = await _pullFromCache(key, subKey: subKey);
     if (null != obj &&
         null != obj.maxAgeDate &&
-        obj.maxAgeDate < DateTime.now().millisecondsSinceEpoch) {
+        obj.maxAgeDate! < DateTime.now().millisecondsSinceEpoch) {
       return null;
     }
     return obj;
   }
 
-  Future<CacheObj> pullFromCacheBeforeMaxStale(String key,
-      {String subKey}) async {
+  Future<CacheObj?> pullFromCacheBeforeMaxStale(String key,
+      {String? subKey}) async {
     return await _pullFromCache(key, subKey: subKey);
   }
 
   Future<bool> pushToCache(CacheObj obj) {
-    obj.key = _convertMd5(obj.key);
-    if (null != obj.subKey) obj.subKey = _convertMd5(obj.subKey);
+    obj.key = _convertMd5(obj.key!);
+    if (null != obj.subKey) obj.subKey = _convertMd5(obj.subKey!);
 
-    if (null == obj.maxAgeDate || obj.maxAgeDate <= 0) {
+    if (null == obj.maxAgeDate || obj.maxAgeDate! <= 0) {
       obj.maxAge = _config.defaultMaxAge;
     }
-    if (null == obj.maxAgeDate || obj.maxAgeDate <= 0) {
+    if (null == obj.maxAgeDate || obj.maxAgeDate! <= 0) {
       return Future.value(false);
     }
-    if ((null == obj.maxStaleDate || obj.maxStaleDate <= 0) &&
+    if ((null == obj.maxStaleDate || obj.maxStaleDate! <= 0) &&
         null != _config.defaultMaxStale) {
       obj.maxStale = _config.defaultMaxStale;
     }
@@ -88,7 +88,7 @@ class CacheManager {
         _memoryCacheStore?.setCacheObj(obj), _diskCacheStore?.setCacheObj(obj));
   }
 
-  Future<bool> delete(String key, {String subKey}) {
+  Future<bool> delete(String key, {String? subKey}) {
     key = _convertMd5(key);
     if (null != subKey) subKey = _convertMd5(subKey);
 
@@ -114,12 +114,12 @@ class CacheManager {
   }
 
   Future<bool> _getCacheFutureResult(
-      ICacheStore memoryCacheStore,
-      ICacheStore diskCacheStore,
-      Future<bool> memoryCacheFuture,
-      Future<bool> diskCacheFuture) async {
-    var result1 = (null == memoryCacheStore) ? true : (await memoryCacheFuture);
-    var result2 = (null == diskCacheStore) ? true : (await diskCacheFuture);
+      ICacheStore? memoryCacheStore,
+      ICacheStore? diskCacheStore,
+      Future<bool>? memoryCacheFuture,
+      Future<bool>? diskCacheFuture) async {
+    var result1 = (null == memoryCacheStore) ? true : (await memoryCacheFuture!);
+    var result2 = (null == diskCacheStore) ? true : (await diskCacheFuture!);
     return result1 && result2;
   }
 }
