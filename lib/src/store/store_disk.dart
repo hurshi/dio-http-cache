@@ -4,7 +4,9 @@ import 'package:dio_http_cache/src/core/config.dart';
 import 'package:dio_http_cache/src/core/obj.dart';
 import 'package:dio_http_cache/src/store/store_impl.dart';
 import 'package:path/path.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:sqflite/sqflite.dart';
+import 'package:uuid/uuid.dart';
 
 class DiskCacheStore extends ICacheStore {
   final String _databasePath;
@@ -16,7 +18,7 @@ class DiskCacheStore extends ICacheStore {
   final String _columnSubKey = "subKey";
   final String _columnMaxAgeDate = "max_age_date";
   final String _columnMaxStaleDate = "max_stale_date";
-  final String _columnContent = "content";
+  final String _columnFileName = "file_name";
   final String _columnStatusCode = "statusCode";
   final String _columnHeaders = "headers";
 
@@ -59,9 +61,9 @@ class DiskCacheStore extends ICacheStore {
         $_columnSubKey text, 
         $_columnMaxAgeDate integer,
         $_columnMaxStaleDate integer,
-        $_columnContent BLOB,
+        $_columnFileName text,
         $_columnStatusCode integer,
-        $_columnHeaders BLOB,
+        $_columnHeaders blob,
         PRIMARY KEY ($_columnKey, $_columnSubKey)
         ) 
       ''';
@@ -111,19 +113,29 @@ class DiskCacheStore extends ICacheStore {
   Future<CacheObj> getCacheObj(String key, {String subKey}) async {
     var db = await _database;
     if (null == db) return null;
+    final cachePath = await _createCacheDir();
     var where = "$_columnKey=\"$key\"";
     if (null != subKey) where += " and $_columnSubKey=\"$subKey\"";
     var resultList = await db.query(_tableCacheObject, where: where);
     if (null == resultList || resultList.length <= 0) return null;
-    return await _decryptCacheObj(CacheObj.fromJson(resultList[0]));
+    var cacheObj = CacheObj.fromJson(resultList[0]);
+    var cacheFilePath = join(cachePath, resultList[0]['file_name']);
+    final file = File(cacheFilePath);
+    cacheObj.content = file.readAsBytesSync();
+    return await _decryptCacheObj(cacheObj);
   }
 
   @override
   Future<bool> setCacheObj(CacheObj obj) async {
     var db = await _database;
     if (null == db) return false;
+    final cacheDirPath = await _createCacheDir();
+    var fileName = 'cache_' + Uuid().v4().replaceAll('-', '');
+    final cacheFilePath = join(cacheDirPath, fileName);
+    final file = File(cacheFilePath);
     var content = await _encryptCacheStr(obj.content);
     var headers = await _encryptCacheStr(obj.headers);
+    await file.writeAsBytes(content);
     await db.insert(
         _tableCacheObject,
         {
@@ -131,7 +143,7 @@ class DiskCacheStore extends ICacheStore {
           _columnSubKey: obj.subKey ?? "",
           _columnMaxAgeDate: obj.maxAgeDate ?? 0,
           _columnMaxStaleDate: obj.maxStaleDate ?? 0,
-          _columnContent: content,
+          _columnFileName: fileName,
           _columnStatusCode: obj.statusCode,
           _columnHeaders: headers
         },
@@ -143,8 +155,22 @@ class DiskCacheStore extends ICacheStore {
   Future<bool> delete(String key, {String subKey}) async {
     var db = await _database;
     if (null == db) return false;
+    final cacheDirPath = await _createCacheDir();
+    final cacheDir = Directory(cacheDirPath);
+    if (!cacheDir.existsSync()) {
+      cacheDir.createSync(recursive: true);
+    }
     var where = "$_columnKey=\"$key\"";
     if (null != subKey) where += " and $_columnSubKey=\"$subKey\"";
+    var resultList = await db.query(_tableCacheObject, where: where);
+    if (null == resultList || resultList.length <= 0) return false;
+    resultList.forEach((ri) {
+      final cacheFilePath = join(cacheDirPath, ri['file_name']);
+      final file = File(cacheFilePath);
+      if (file.existsSync()) {
+        file.deleteSync();
+      }
+    });
     return 0 != await db.delete(_tableCacheObject, where: where);
   }
 
@@ -156,17 +182,47 @@ class DiskCacheStore extends ICacheStore {
 
   Future<bool> _clearExpired(Database db) async {
     if (null == db) return false;
+    final cacheDirPath = await _createCacheDir();
+    final cacheDir = Directory(cacheDirPath);
+    if (!cacheDir.existsSync()) {
+      cacheDir.createSync(recursive: true);
+    }
     var now = DateTime.now().millisecondsSinceEpoch;
     var where1 = "$_columnMaxStaleDate > 0 and $_columnMaxStaleDate < $now";
     var where2 = "$_columnMaxStaleDate <= 0 and $_columnMaxAgeDate < $now";
+    var resultList =
+        await db.query(_tableCacheObject, where: "( $where1 ) or ( $where2 )");
+    if (null == resultList || resultList.length <= 0) return false;
+    resultList.forEach((ri) {
+      final cacheFilePath = join(cacheDirPath, ri['file_name']);
+      final file = File(cacheFilePath);
+      if (file.existsSync()) {
+        file.deleteSync();
+      }
+    });
     return 0 !=
         await db.delete(_tableCacheObject, where: "( $where1 ) or ( $where2 )");
+  }
+
+  Future<String> _createCacheDir() async {
+    final cachePath =
+        join((await getApplicationDocumentsDirectory()).path, _databaseName);
+    final cacheDir = Directory(cachePath);
+    if (!(await cacheDir.exists())) {
+      await cacheDir.create(recursive: true);
+    }
+    return cachePath;
   }
 
   @override
   Future<bool> clearAll() async {
     var db = await _database;
     if (null == db) return false;
+    final cacheDirPath = await _createCacheDir();
+    final cacheDir = Directory(cacheDirPath);
+    if (await cacheDir.exists()) {
+      await cacheDir.delete(recursive: true);
+    }
     return 0 != await db.delete(_tableCacheObject);
   }
 
