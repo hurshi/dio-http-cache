@@ -32,7 +32,8 @@ class MemoryCacheStore extends ICacheStore {
   @override
   Future<bool> delete(String key, {String? subKey}) async {
 //    _mapCache.invalidate("${key}_${subKey ?? ""}");
-    _removeKey(key, subKey: subKey).forEach((key) => _mapCache!.invalidate(key));
+    _removeKey(key, subKey: subKey)
+        .forEach((key) => _mapCache!.invalidate(key));
     return true;
   }
 
@@ -51,7 +52,7 @@ class MemoryCacheStore extends ICacheStore {
 
   _storeKey(CacheObj obj) {
     List<String>? subKeyList = _keys![obj.key];
-    if (null == subKeyList) subKeyList = List.empty();
+    if (null == subKeyList) subKeyList = [];
     subKeyList.add(obj.subKey ?? "");
     _keys![obj.key] = subKeyList;
   }
