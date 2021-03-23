@@ -144,23 +144,21 @@ class DioCacheManager {
     var cacheControl = response.headers.value(HttpHeaders.cacheControlHeader);
     if (null != cacheControl) {
       // try to get maxAge and maxStale from cacheControl
-      var parameters;
+      Map<String, String?> parameters;
       try {
-        parameters = HeaderValue.parse(
-                "${HttpHeaders.cacheControlHeader}: $cacheControl",
-                parameterSeparator: ",",
-                valueSeparator: "=")
+        parameters = HeaderValue.parse("${HttpHeaders.cacheControlHeader}: $cacheControl",
+                parameterSeparator: ",", valueSeparator: "=")
             .parameters;
+        _maxAge = _tryGetDurationFromMap(parameters, "s-maxage");
+        if (null == _maxAge) {
+          _maxAge = _tryGetDurationFromMap(parameters, "max-age");
+        }
+        // if maxStale has valued, don't get max-stale anymore.
+        if (null == maxStale) {
+          maxStale = _tryGetDurationFromMap(parameters, "max-stale");
+        }
       } catch (e) {
         print(e);
-      }
-      _maxAge = _tryGetDurationFromMap(parameters, "s-maxage");
-      if (null == _maxAge) {
-        _maxAge = _tryGetDurationFromMap(parameters, "max-age");
-      }
-      // if maxStale has valued, don't get max-stale anymore.
-      if (null == maxStale) {
-        maxStale = _tryGetDurationFromMap(parameters, "max-stale");
       }
     } else {
       // try to get maxAge from expires
@@ -180,8 +178,8 @@ class DioCacheManager {
     callback(_maxAge, maxStale);
   }
 
-  Duration? _tryGetDurationFromMap(Map<String, String>? parameters, String key) {
-    if (null != parameters && parameters.containsKey(key)) {
+  Duration? _tryGetDurationFromMap(Map<String, String?> parameters, String key) {
+    if (parameters.containsKey(key)) {
       var value = int.tryParse(parameters[key]!);
       if (null != value && value >= 0) {
         return Duration(seconds: value);
