@@ -14,7 +14,7 @@ dependencies:
   dio: ^4.0.0-prev3
   flutter:
     sdk: flutter
-  json_serializable: ^4.1.0
+  json_serializable: ^4.0.3
   path: ^1.8.0
   quiver: ^3.0.0
   sqflite: ^2.0.0+3
