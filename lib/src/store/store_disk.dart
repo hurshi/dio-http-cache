@@ -7,10 +7,10 @@ import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';
 
 class DiskCacheStore extends ICacheStore {
-  final String _databasePath;
+  final String? _databasePath;
   final String _databaseName;
-  final Encrypt _encrypt;
-  final Decrypt _decrypt;
+  final Encrypt? _encrypt;
+  final Decrypt? _decrypt;
   final String _tableCacheObject = "cache_dio";
   final String _columnKey = "key";
   final String _columnSubKey = "subKey";
@@ -20,10 +20,10 @@ class DiskCacheStore extends ICacheStore {
   final String _columnStatusCode = "statusCode";
   final String _columnHeaders = "headers";
 
-  Database _db;
+  Database? _db;
   static const int _curDBVersion = 3;
 
-  Future<Database> get _database async {
+  Future<Database?> get _database async {
     if (null == _db) {
       var path = _databasePath;
       if (null == path || path.length <= 0) {
@@ -33,7 +33,7 @@ class DiskCacheStore extends ICacheStore {
       path = join(path, "$_databaseName.db");
       _db = await openDatabase(path,
           version: _curDBVersion,
-          onConfigure: (db) => _tryFixDbNoVersionBug(db, path),
+          onConfigure: (db) => _tryFixDbNoVersionBug(db, path!),
           onCreate: _onCreate,
           onUpgrade: _onUpgrade);
       await _clearExpired(_db);
@@ -46,7 +46,7 @@ class DiskCacheStore extends ICacheStore {
       var isTableUserLogExist = await db
           .rawQuery(
               "select DISTINCT tbl_name from sqlite_master where tbl_name = '$_tableCacheObject'")
-          .then((v) => (null != v && v.length > 0));
+          .then((v) => (v.length > 0));
       if (isTableUserLogExist) {
         await db.setVersion(1);
       }
@@ -70,7 +70,7 @@ class DiskCacheStore extends ICacheStore {
     await db.execute(_getCreateTableSql());
   }
 
-  List<List<String>> _dbUpgradeList() => [
+  List<List<String>?> _dbUpgradeList() => [
         // 0 -> 1
         null,
         // 1 -> 2
@@ -92,7 +92,7 @@ class DiskCacheStore extends ICacheStore {
           if (null != sqlList && sqlList.length > 0) {
             sqlList.forEach((sql) async {
               sql = sql.trim();
-              if (null != sql && sql.length > 0) {
+              if (sql.length > 0) {
                 await txn.execute(sql);
               }
             });
@@ -108,13 +108,13 @@ class DiskCacheStore extends ICacheStore {
       : super();
 
   @override
-  Future<CacheObj> getCacheObj(String key, {String subKey}) async {
+  Future<CacheObj?> getCacheObj(String key, {String? subKey}) async {
     var db = await _database;
     if (null == db) return null;
     var where = "$_columnKey=\"$key\"";
     if (null != subKey) where += " and $_columnSubKey=\"$subKey\"";
     var resultList = await db.query(_tableCacheObject, where: where);
-    if (null == resultList || resultList.length <= 0) return null;
+    if (resultList.isEmpty) return null;
     return await _decryptCacheObj(CacheObj.fromJson(resultList[0]));
   }
 
@@ -140,7 +140,7 @@ class DiskCacheStore extends ICacheStore {
   }
 
   @override
-  Future<bool> delete(String key, {String subKey}) async {
+  Future<bool> delete(String key, {String? subKey}) async {
     var db = await _database;
     if (null == db) return false;
     var where = "$_columnKey=\"$key\"";
@@ -154,7 +154,7 @@ class DiskCacheStore extends ICacheStore {
     return _clearExpired(db);
   }
 
-  Future<bool> _clearExpired(Database db) async {
+  Future<bool> _clearExpired(Database? db) async {
     if (null == db) return false;
     var now = DateTime.now().millisecondsSinceEpoch;
     var where1 = "$_columnMaxStaleDate > 0 and $_columnMaxStaleDate < $now";
@@ -176,18 +176,18 @@ class DiskCacheStore extends ICacheStore {
     return obj;
   }
 
-  Future<List<int>> _decryptCacheStr(List<int> bytes) async {
+  Future<List<int>?> _decryptCacheStr(List<int>? bytes) async {
     if (null == bytes) return null;
     if (null != _decrypt) {
-      bytes = await _decrypt(bytes);
+      bytes = await _decrypt!(bytes);
     }
     return bytes;
   }
 
-  Future<List<int>> _encryptCacheStr(List<int> bytes) async {
+  Future<List<int>?> _encryptCacheStr(List<int>? bytes) async {
     if (null == bytes) return null;
     if (null != _encrypt) {
-      bytes = await _encrypt(bytes);
+      bytes = await _encrypt!(bytes);
     }
     return bytes;
   }
