@@ -48,7 +48,7 @@ class DioCacheManager {
     var responseDataFromCache = await _pullFromCacheBeforeMaxAge(options);
     if (null != responseDataFromCache) {
       return handler.resolve(_buildResponse(
-          responseDataFromCache, responseDataFromCache.statusCode, options));
+          responseDataFromCache, responseDataFromCache.statusCode, options), true);
     }
     return handler.next(options);
   }
