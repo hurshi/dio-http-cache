@@ -8,7 +8,7 @@ class CacheConfig {
   final Duration? defaultMaxStale;
   final String? databasePath;
   final String databaseName;
-  final String baseUrl;
+  final String? baseUrl;
   final String defaultRequestMethod;
 
   final bool skipMemoryCache;
@@ -26,7 +26,7 @@ class CacheConfig {
       this.defaultRequestMethod = "POST",
       this.databasePath,
       this.databaseName = "DioCache",
-      required this.baseUrl,
+      this.baseUrl,
       this.skipDiskCache = false,
       this.skipMemoryCache = false,
       this.maxMemoryCacheCount = 100,

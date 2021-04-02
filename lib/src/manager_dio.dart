@@ -20,7 +20,7 @@ typedef _ParseHeadCallback = void Function(
 class DioCacheManager {
   late CacheManager _manager;
   InterceptorsWrapper? _interceptor;
-  late String _baseUrl;
+  late String? _baseUrl;
   late String _defaultRequestMethod;
 
   DioCacheManager(CacheConfig config) {
@@ -253,10 +253,10 @@ class DioCacheManager {
   /// empty local cache.
   Future<bool> clearAll() => _manager.clearAll();
 
-  Uri _getUriByPath(String baseUrl, String path,
+  Uri _getUriByPath(String? baseUrl, String path,
       {dynamic data, Map<String, dynamic>? queryParameters}) {
     if (!path.startsWith(RegExp(r"https?:"))) {
-      assert(baseUrl.length > 0);
+      assert(baseUrl != null && baseUrl.length > 0);
     }
     return RequestOptions(
             baseUrl: baseUrl,
