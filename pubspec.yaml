@@ -19,7 +19,7 @@ dependencies:
   path_provider: ^1.6.18
   quiver: ^2.0.3
   sqflite: ^1.1.6+3
-  uuid: ^2.2.2
+  uuid: ^3.0.4
 
 dev_dependencies:
   flutter_test:
