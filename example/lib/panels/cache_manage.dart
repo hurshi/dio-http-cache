@@ -25,13 +25,13 @@ class MyDiskStore implements ICacheStore {
   }
 
   @override
-  Future<bool> delete(String key, {String subKey}) {
+  Future<bool> delete(String key, {String? subKey}) {
     // TODO: implement delete
     throw UnimplementedError();
   }
 
   @override
-  Future<CacheObj> getCacheObj(String key, {String subKey}) {
+  Future<CacheObj> getCacheObj(String key, {String? subKey}) {
     // TODO: implement getCacheObj
     throw UnimplementedError();
   }
@@ -45,7 +45,7 @@ class MyDiskStore implements ICacheStore {
 
 
 class _CacheManagerPanelState extends State<CacheManagerPanel> {
-  _Mode _mode = _Mode.clearAll;
+  _Mode? _mode = _Mode.clearAll;
   var _url = "article/query/0/json";
   var _keyController = TextEditingController();
   var _requestMethodController = TextEditingController();
@@ -61,13 +61,13 @@ class _CacheManagerPanelState extends State<CacheManagerPanel> {
               Text("Cache Manager",
                   style: Theme.of(context)
                       .textTheme
-                      .title
+                      .headline6!
                       .copyWith(color: Theme.of(context).accentColor)),
               Container(height: 50),
               Text("1. Choose mode:",
                   style: Theme.of(context)
                       .textTheme
-                      .subtitle
+                      .subtitle2!
                       .copyWith(color: Theme.of(context).accentColor)),
               DropdownButton<_Mode>(
                   value: _mode,
@@ -91,7 +91,7 @@ class _CacheManagerPanelState extends State<CacheManagerPanel> {
               Text("${getLabel()}. to clear",
                   style: Theme.of(context)
                       .textTheme
-                      .subtitle
+                      .subtitle2!
                       .copyWith(color: Theme.of(context).accentColor)),
               Padding(
                   padding: EdgeInsets.all(10),
@@ -99,7 +99,7 @@ class _CacheManagerPanelState extends State<CacheManagerPanel> {
                       child: Text("Clear",
                           style: Theme.of(context)
                               .textTheme
-                              .subtitle
+                              .subtitle2!
                               .copyWith(color: Colors.white)),
                       onPressed: () => _clear()))
             ]));
@@ -124,7 +124,7 @@ class _CacheManagerPanelState extends State<CacheManagerPanel> {
   }
 
   void showSnackBar(String msg) {
-    Scaffold.of(context).showSnackBar(SnackBar(content: Text(msg)));
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg)));
   }
 
   List<Widget> getRequestMethodViews(BuildContext context) {
@@ -134,11 +134,11 @@ class _CacheManagerPanelState extends State<CacheManagerPanel> {
       Text("2. RequestMethod:",
           style: Theme.of(context)
               .textTheme
-              .subtitle
+              .subtitle2!
               .copyWith(color: Theme.of(context).accentColor)),
       TextField(
           controller: _requestMethodController,
-          style: Theme.of(context).textTheme.body2),
+          style: Theme.of(context).textTheme.bodyText1),
       Container(height: 20),
     ];
   }
@@ -150,10 +150,10 @@ class _CacheManagerPanelState extends State<CacheManagerPanel> {
       Text("3. Key:",
           style: Theme.of(context)
               .textTheme
-              .subtitle
+              .subtitle2!
               .copyWith(color: Theme.of(context).accentColor)),
       TextField(
-          controller: _keyController, style: Theme.of(context).textTheme.body2),
+          controller: _keyController, style: Theme.of(context).textTheme.bodyText1),
       Container(height: 20),
     ];
   }
@@ -165,11 +165,11 @@ class _CacheManagerPanelState extends State<CacheManagerPanel> {
       Text("4. Subkey:",
           style: Theme.of(context)
               .textTheme
-              .subtitle
+              .subtitle2!
               .copyWith(color: Theme.of(context).accentColor)),
       TextField(
           controller: _subKeyController,
-          style: Theme.of(context).textTheme.body2),
+          style: Theme.of(context).textTheme.bodyText1),
       Container(height: 20),
     ];
   }

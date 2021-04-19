@@ -6,8 +6,8 @@ import 'package:quiver/cache.dart';
 
 class MemoryCacheStore extends ICacheStore {
   final int _maxMemoryCacheCount;
-  MapCache<String, CacheObj> _mapCache;
-  Map<String, List<String>> _keys;
+  late MapCache<String, CacheObj> _mapCache;
+  late Map<String, List<String>> _keys;
 
   MemoryCacheStore(this._maxMemoryCacheCount) : super() {
     _initMap();
@@ -19,7 +19,7 @@ class MemoryCacheStore extends ICacheStore {
   }
 
   @override
-  Future<CacheObj> getCacheObj(String key, {String subKey = ""}) async =>
+  Future<CacheObj?> getCacheObj(String key, {String? subKey = ""}) async =>
       _mapCache.get("${key}_$subKey");
 
   @override
@@ -30,8 +30,7 @@ class MemoryCacheStore extends ICacheStore {
   }
 
   @override
-  Future<bool> delete(String key, {String subKey}) async {
-//    _mapCache.invalidate("${key}_${subKey ?? ""}");
+  Future<bool> delete(String key, {String? subKey}) async {
     _removeKey(key, subKey: subKey).forEach((key) => _mapCache.invalidate(key));
     return true;
   }
@@ -43,21 +42,19 @@ class MemoryCacheStore extends ICacheStore {
 
   @override
   Future<bool> clearAll() async {
-    _mapCache = null;
-    _keys = null;
     _initMap();
     return true;
   }
 
   _storeKey(CacheObj obj) {
-    List<String> subKeyList = _keys[obj.key];
-    if (null == subKeyList) subKeyList = List();
+    List<String>? subKeyList = _keys[obj.key];
+    if (null == subKeyList) subKeyList = [];
     subKeyList.add(obj.subKey ?? "");
     _keys[obj.key] = subKeyList;
   }
 
-  List<String> _removeKey(String key, {String subKey}) {
-    List<String> subKeyList = _keys[key];
+  List<String> _removeKey(String key, {String? subKey}) {
+    List<String>? subKeyList = _keys[key];
     if (null == subKeyList || subKeyList.length <= 0) return [];
     if (null == subKey) {
       _keys.remove(key);

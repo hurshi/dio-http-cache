@@ -8,7 +8,7 @@ import '../dio_helper.dart';
 
 class PanelHelper {
   static Map<String, String> getPrintContent<T>(
-      String key, String subKey, Response<T> response) {
+      String key, String? subKey, Response<T> response) {
     var result = {
       "Cached": "",
       "Key":
@@ -41,9 +41,9 @@ class PanelHelper {
 
   static Widget buildNormalPanel(
       String title,
-      TextEditingController _urlController,
-      TextEditingController _paramsController,
-      Map<String, String> txt,
+      TextEditingController? _urlController,
+      TextEditingController? _paramsController,
+      Map<String, String?> txt,
       Function() request) {
     return Builder(
         builder: (context) => Padding(
@@ -54,18 +54,18 @@ class PanelHelper {
                   Text("NOTE: $title",
                       style: Theme.of(context)
                           .textTheme
-                          .subtitle
+                          .subtitle2!
                           .copyWith(color: Theme.of(context).primaryColor)),
                   Container(height: 20),
                   Text("Base url:",
                       style: Theme.of(context)
                           .textTheme
-                          .subtitle
+                          .subtitle2!
                           .copyWith(color: Theme.of(context).accentColor)),
                   Text(DioHelper.baseUrl,
                       style: Theme.of(context)
                           .textTheme
-                          .body1
+                          .bodyText2!
                           .copyWith(color: Colors.grey)),
                   for (var w in _buildInput(
                       context,
@@ -86,34 +86,34 @@ class PanelHelper {
   }
 
   static List<TextSpan> _buildConsoleOutput(
-      BuildContext context, Map<String, String> map) {
+      BuildContext context, Map<String, String?> map) {
     List<TextSpan> widgets = [];
     map.forEach((k, v) {
       widgets.add(TextSpan(
           text: "$k: ",
           style: Theme.of(context)
               .textTheme
-              .subtitle
+              .subtitle2!
               .copyWith(color: Colors.teal)));
       widgets.add(TextSpan(
           text: "$v\n\n",
           style: Theme.of(context)
               .textTheme
-              .body1
+              .bodyText2!
               .copyWith(color: Theme.of(context).disabledColor)));
     });
     return widgets;
   }
 
   static List<Widget> _buildInput(BuildContext context,
-      TextEditingController controller, String title, Function() request) {
+      TextEditingController? controller, String title, Function()? request) {
     if (null == controller) return [];
     return [
       Container(height: 20),
       Text("$title:",
           style: Theme.of(context)
               .textTheme
-              .subtitle
+              .subtitle2!
               .copyWith(color: Theme.of(context).accentColor)),
       Row(children: <Widget>[
         Expanded(child: TextField(controller: controller)),
@@ -123,7 +123,7 @@ class PanelHelper {
   }
 
   static List<Widget> _buildRequestButton(
-      BuildContext context, Function() request) {
+      BuildContext context, Function()? request) {
     if (null != request)
       return [
         Container(width: 10),
@@ -131,7 +131,7 @@ class PanelHelper {
             child: Text("GO",
                 style: Theme.of(context)
                     .textTheme
-                    .subtitle
+                    .subtitle2!
                     .copyWith(color: Colors.white)),
             onPressed: () => request())
       ];
