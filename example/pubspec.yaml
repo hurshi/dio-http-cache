@@ -11,6 +11,8 @@ dependencies:
     sdk: flutter
   dio_http_cache:
     path: ../
+  hive: ^2.0.3
+  hive_flutter: ^1.0.0
 
 dev_dependencies:
   flutter_test:

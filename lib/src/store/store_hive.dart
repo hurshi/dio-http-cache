@@ -1,6 +1,5 @@
 import 'package:dio_http_cache/src/core/cache_obj.dart';
 import 'package:hive/hive.dart';
-import "package:hive_flutter/hive_flutter.dart";
 
 import 'store_impl.dart';
 
@@ -8,18 +7,12 @@ class StoreHive extends ICacheStore {
   static final String storeName = "http_cache";
 
   final String? subDir;
-  bool initFlutter = false;
 
   StoreHive(this.subDir) {
     Hive.registerAdapter(CacheObjAdapter());
   }
 
   Future<Box<CacheObj>> openBox() async {
-    if (!initFlutter) {
-      await Hive.initFlutter(subDir);
-      initFlutter = true;
-    }
-
     if (Hive.isBoxOpen(storeName)) {
       return Hive.box<CacheObj>(storeName);
     }

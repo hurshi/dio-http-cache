@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:hive/hive.dart';
+import "package:hive_flutter/hive_flutter.dart";
 
 import 'panels/cache_manage.dart';
 import 'panels/panel_204.dart';
@@ -11,6 +13,10 @@ import 'tuple.dart';
 void main() => runApp(MyApp());
 
 class MyApp extends StatelessWidget {
+  MyApp(){
+    Hive.initFlutter("example_dir");
+  }
+
   @override
   Widget build(BuildContext context) {
     final title = "DioHttpCache Example";
