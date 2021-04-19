@@ -2,11 +2,10 @@ import 'dart:convert';
 
 import 'package:crypto/crypto.dart';
 import 'package:dio_http_cache/src/core/config.dart';
-import 'package:dio_http_cache/src/core/obj.dart';
-import 'package:dio_http_cache/src/store/store_disk.dart';
+import 'package:dio_http_cache/src/core/cache_obj.dart';
+import 'package:dio_http_cache/src/store/store_hive.dart';
 import 'package:dio_http_cache/src/store/store_impl.dart';
 import 'package:dio_http_cache/src/store/store_memory.dart';
-import 'package:sqflite/utils/utils.dart';
 
 class CacheManager {
   CacheConfig _config;
@@ -16,12 +15,13 @@ class CacheManager {
 
   CacheManager(this._config) {
     _utf8encoder = const Utf8Encoder();
-    if (!_config.skipDiskCache)
-      _diskCacheStore = _config.diskStore ??
-          DiskCacheStore(_config.databasePath, _config.databaseName,
-              _config.encrypt, _config.decrypt);
-    if (!_config.skipMemoryCache)
+    if (!_config.skipDiskCache) {
+      _diskCacheStore = _config.diskStore ?? StoreHive(_config.diskSubDir);
+    }
+
+    if (!_config.skipMemoryCache) {
       _memoryCacheStore = MemoryCacheStore(_config.maxMemoryCacheCount);
+    }
   }
 
   Future<CacheObj?> _pullFromCache(String key, {String? subKey}) async {
@@ -51,8 +51,7 @@ class CacheManager {
     return obj;
   }
 
-  Future<CacheObj?> pullFromCacheBeforeMaxAge(String key,
-      {String? subKey}) async {
+  Future<CacheObj?> pullFromCacheBeforeMaxAge(String key, {String? subKey}) async {
     var obj = await _pullFromCache(key, subKey: subKey);
     if (null != obj &&
         null != obj.maxAgeDate &&
@@ -62,8 +61,7 @@ class CacheManager {
     return obj;
   }
 
-  Future<CacheObj?> pullFromCacheBeforeMaxStale(String key,
-      {String? subKey}) async {
+  Future<CacheObj?> pullFromCacheBeforeMaxStale(String key, {String? subKey}) async {
     return await _pullFromCache(key, subKey: subKey);
   }
 
@@ -77,8 +75,7 @@ class CacheManager {
     if (null == obj.maxAgeDate || obj.maxAgeDate! <= 0) {
       return Future.value(false);
     }
-    if ((null == obj.maxStaleDate || obj.maxStaleDate! <= 0) &&
-        null != _config.defaultMaxStale) {
+    if ((null == obj.maxStaleDate || obj.maxStaleDate! <= 0) && null != _config.defaultMaxStale) {
       obj.maxStale = _config.defaultMaxStale;
     }
 
@@ -103,21 +100,32 @@ class CacheManager {
   }
 
   Future<bool> clearAll() {
-    return _getCacheFutureResult(_memoryCacheStore, _diskCacheStore,
-        _memoryCacheStore?.clearAll(), _diskCacheStore?.clearAll());
+    return _getCacheFutureResult(_memoryCacheStore, _diskCacheStore, _memoryCacheStore?.clearAll(),
+        _diskCacheStore?.clearAll());
   }
 
   String _convertMd5(String str) {
     return hex(md5.convert(_utf8encoder.convert(str)).bytes);
   }
 
-  Future<bool> _getCacheFutureResult(
-      ICacheStore? memoryCacheStore,
-      ICacheStore? diskCacheStore,
-      Future<bool>? memoryCacheFuture,
-      Future<bool>? diskCacheFuture) async {
+  Future<bool> _getCacheFutureResult(ICacheStore? memoryCacheStore, ICacheStore? diskCacheStore,
+      Future<bool>? memoryCacheFuture, Future<bool>? diskCacheFuture) async {
     var result1 = (null == memoryCacheStore) ? true : (await memoryCacheFuture!);
     var result2 = (null == diskCacheStore) ? true : (await diskCacheFuture!);
     return result1 && result2;
+  }
+
+  // https://github.com/tekartik/sqflite/blob/master/sqflite_common/lib/utils/utils.dart
+  /// Utility to encode a blob to allow blob query using
+  /// 'hex(blob_field) = ?', Sqlite.hex([1,2,3])
+  String hex(List<int> bytes) {
+    final buffer = StringBuffer();
+    for (var part in bytes) {
+      if (part & 0xff != part) {
+        throw FormatException('$part is not a byte integer');
+      }
+      buffer.write('${part < 16 ? '0' : ''}${part.toRadixString(16)}');
+    }
+    return buffer.toString().toUpperCase();
   }
 }

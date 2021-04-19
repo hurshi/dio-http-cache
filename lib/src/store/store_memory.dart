@@ -1,6 +1,6 @@
 import 'dart:collection';
 
-import 'package:dio_http_cache/src/core/obj.dart';
+import 'package:dio_http_cache/src/core/cache_obj.dart';
 import 'package:dio_http_cache/src/store/store_impl.dart';
 import 'package:quiver/cache.dart';
 
