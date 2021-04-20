@@ -99,7 +99,8 @@ class DioCacheManager {
     return Response(
         data: data,
         headers: headers,
-        requestOptions: options.extra.remove(DIO_CACHE_KEY_TRY_CACHE),
+        requestOptions: options.copyWith(
+            extra: options.extra..remove(DIO_CACHE_KEY_TRY_CACHE)),
         statusCode: statusCode ?? 200);
   }
 
