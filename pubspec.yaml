@@ -11,7 +11,7 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  quiver: ^2.0.3
+  quiver: ^3.0.1
   json_serializable: ^4.1.0
   json_annotation: ^4.0.1
   dio: ^4.0.0
