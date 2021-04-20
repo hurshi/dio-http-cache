@@ -6,7 +6,7 @@ authors:
 homepage: https://github.com/hurshi/dio-http-cache
 
 environment:
-  sdk: ">=2.1.0 <3.0.0"
+  sdk: '>=2.1.0 <3.0.0'
 
 dependencies:
   flutter:
@@ -14,7 +14,7 @@ dependencies:
   quiver: ^2.0.3
   json_serializable: ^3.0.0
   json_annotation: ^3.0.0
-  dio: ^3.0.1
+  dio: ^4.0.0
   sqflite: ^1.1.6+3
   path: ^1.6.2
   crypto: ^2.1.1+1
