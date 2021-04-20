@@ -66,9 +66,12 @@ class DioCacheManager {
   _onError(DioError e, ErrorInterceptorHandler handler) async {
     if ((e.requestOptions.extra[DIO_CACHE_KEY_TRY_CACHE] ?? false) == true) {
       var responseDataFromCache = await _pullFromCacheBeforeMaxStale(e.requestOptions);
-      if (null != responseDataFromCache)
-        return _buildResponse(responseDataFromCache,
+      if (null != responseDataFromCache) {
+        var response = _buildResponse(responseDataFromCache,
             responseDataFromCache.statusCode, e.requestOptions);
+
+        return handler.resolve(response);
+      }
     }
     return handler.next(e);
   }
@@ -91,12 +94,10 @@ class DioCacheManager {
     if (options.responseType != ResponseType.bytes) {
       data = jsonDecode(utf8.decode(data));
     }
-    final requestOptions = options;
-    requestOptions.extra..remove(DIO_CACHE_KEY_TRY_CACHE);
     return Response(
         data: data,
         headers: headers,
-        requestOptions: requestOptions,
+        requestOptions: options.copyWith(extra: options.extra..remove(DIO_CACHE_KEY_TRY_CACHE)),
         statusCode: statusCode ?? 200);
   }
 
