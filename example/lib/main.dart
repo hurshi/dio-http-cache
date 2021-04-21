@@ -22,8 +22,8 @@ class MyApp extends StatelessWidget {
 }
 
 class MyHomePage extends StatefulWidget {
-  MyHomePage({Key key, this.title}) : super(key: key);
-  final String title;
+  MyHomePage({Key? key, this.title}) : super(key: key);
+  final String? title;
 
   @override
   _MyHomePageState createState() => _MyHomePageState();
@@ -38,12 +38,12 @@ class _MyHomePageState extends State<MyHomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(
-            title: Text(widget.title),
+            title: Text(widget.title!),
             actions: <Widget>[_buildHomePageActionButtons(context)]),
         body: getPanel());
   }
 
-  Widget getPanel() {
+  Widget? getPanel() {
     switch (panel) {
       case Panel.CACHE_MANAGER:
         return CacheManagerPanel();
@@ -58,7 +58,6 @@ class _MyHomePageState extends State<MyHomePage> {
       case Panel.GET_BYTES:
         return GetBytesPanel();
     }
-    return null;
   }
 
   Widget _buildHomePageActionButtons(BuildContext context) {
@@ -72,13 +71,13 @@ class _MyHomePageState extends State<MyHomePage> {
       Pair("GET byte array", () => setState(() => panel = Panel.GET_BYTES)),
     ];
     return PopupMenuButton<Pair<String, Function()>>(
-        onSelected: (p) => p.i1(),
+        onSelected: (p) => p.i1!(),
         child: Padding(
             padding: EdgeInsets.all(10),
             child: Icon(Icons.menu, color: Colors.white)),
         itemBuilder: (BuildContext context) => choices
             .map((choice) => PopupMenuItem<Pair<String, Function()>>(
-                value: choice, child: Text(choice.i0)))
+                value: choice, child: Text(choice.i0!)))
             .toList());
   }
 }

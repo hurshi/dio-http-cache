@@ -1,10 +1,10 @@
 /// Represents a 2-tuple or pair.
 class Pair<T0, T1> {
   /// First item of the tuple
-  T0 i0;
+  T0? i0;
 
   /// Second item of the tuple
-  T1 i1;
+  T1? i1;
 
   /// Create a new tuple value with the specified items.
   Pair([this.i0, this.i1]);
@@ -22,9 +22,9 @@ class Pair<T0, T1> {
 
 /// Represents a 3-tuple or pair.
 class Triple<T0, T1, T2> {
-  T0 i0;
-  T1 i1;
-  T2 i2;
+  T0? i0;
+  T1? i1;
+  T2? i2;
 
   Triple([this.i0, this.i1, this.i2]);
 
