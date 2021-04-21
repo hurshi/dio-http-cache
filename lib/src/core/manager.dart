@@ -12,7 +12,7 @@ class CacheManager {
   CacheConfig _config;
   ICacheStore _diskCacheStore;
   ICacheStore _memoryCacheStore;
-  MD5 _md5;
+  Hash _md5;
   Utf8Encoder _utf8encoder;
 
   CacheManager(this._config) {
