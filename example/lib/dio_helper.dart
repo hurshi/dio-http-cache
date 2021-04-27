@@ -5,8 +5,8 @@ import 'package:dio/dio.dart';
 import 'package:dio_http_cache/dio_http_cache.dart';
 
 class DioHelper {
-  static Dio _dio;
-  static DioCacheManager _manager;
+  static Dio? _dio;
+  static DioCacheManager? _manager;
   static final baseUrl = "https://www.wanandroid.com/";
 
   static Dio getDio() {
@@ -18,7 +18,7 @@ class DioHelper {
         ..interceptors.add(getCacheManager().interceptor)
         ..interceptors.add(LogInterceptor(responseBody: true));
     }
-    return _dio;
+    return _dio!;
   }
 
   static DioCacheManager getCacheManager() {
@@ -26,7 +26,7 @@ class DioHelper {
       _manager =
           DioCacheManager(CacheConfig(baseUrl: "https://www.wanandroid.com/"));
     }
-    return _manager;
+    return _manager!;
   }
 
   // set proxy

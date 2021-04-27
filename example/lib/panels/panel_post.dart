@@ -10,7 +10,7 @@ class PostPanel extends StatefulWidget {
 }
 
 class _PostPanelState extends State<PostPanel> {
-  Map<String, String> _content = {"Hello ~": ""};
+  Map<String, String?> _content = {"Hello ~": ""};
   var _url = "article/query/0/json";
   var _paramsController;
   var _urlController;
