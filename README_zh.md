@@ -11,7 +11,7 @@
 
 ```yaml
 dependencies:
-  dio_http_cache: ^0.2.x #latest version
+  dio_http_cache: ^0.3.x #latest version
 ```
 
 ### 简单使用

@@ -10,7 +10,6 @@ class CacheManagerPanel extends StatefulWidget {
 
 enum _Mode { clearByKey, clearByKeyAndSubKey, clearAll }
 
-
 class MyDiskStore implements ICacheStore {
   @override
   Future<bool> clearAll() {
@@ -42,7 +41,6 @@ class MyDiskStore implements ICacheStore {
     throw UnimplementedError();
   }
 }
-
 
 class _CacheManagerPanelState extends State<CacheManagerPanel> {
   _Mode? _mode = _Mode.clearAll;
@@ -153,7 +151,8 @@ class _CacheManagerPanelState extends State<CacheManagerPanel> {
               .subtitle2!
               .copyWith(color: Theme.of(context).accentColor)),
       TextField(
-          controller: _keyController, style: Theme.of(context).textTheme.bodyText1),
+          controller: _keyController,
+          style: Theme.of(context).textTheme.bodyText1),
       Container(height: 20),
     ];
   }

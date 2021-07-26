@@ -116,7 +116,8 @@ class CacheManager {
       ICacheStore? diskCacheStore,
       Future<bool>? memoryCacheFuture,
       Future<bool>? diskCacheFuture) async {
-    var result1 = (null == memoryCacheStore) ? true : (await memoryCacheFuture!);
+    var result1 =
+        (null == memoryCacheStore) ? true : (await memoryCacheFuture!);
     var result2 = (null == diskCacheStore) ? true : (await diskCacheFuture!);
     return result1 && result2;
   }
