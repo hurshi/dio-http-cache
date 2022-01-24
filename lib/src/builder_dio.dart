@@ -17,7 +17,7 @@ Options buildServiceCacheOptions(
         forceRefresh: forceRefresh);
 
 /// build a normal cache options
-Options buildCacheOptions(Duration maxAge,
+Options buildCacheOptions(Duration? maxAge,
         {Duration? maxStale,
         String? primaryKey,
         String? subKey,
