@@ -14,7 +14,7 @@ Inspired by [flutter_cache_manager](https://github.com/renefloor/flutter_cache_m
 
 ```yaml
 dependencies:
-  dio_http_cache: ^0.3.x #latest version
+  dio_http_cache: ^0.4.x #latest version
 ```
 
 ### QuickStart
@@ -100,7 +100,7 @@ dependencies:
       _dioCacheManager.deleteByPrimaryKeyAndSubKey(path, requestMethod: "GET"); 
       ```
 
-      **IMPORTANT:** If you have additional parameters when requesting the http interface, you must take them with it, for example:
+      **INPORTANT:** If you have additional parameters when requesting the http interface, you must take them with it, for example:
 
       ```dart
       _dio.get(_url, queryParameters: {'k': keyword}, 
