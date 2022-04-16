@@ -72,9 +72,9 @@ dependencies:
    4. **defaultaMaxStale:** similar with DefaultMaxAge.
    5. **databasePath:** database path.
    6. **databaseName:** database name.
-   7. **skipMemoryCache:** false defalut.
+   7. **skipMemoryCache:** false default.
    8. **skipDiskCache:** false default.
-   9. **maxMemoryCacheCount:** 100 defalut.
+   9. **maxMemoryCacheCount:** 100 default.
    10. **defaultRequestMethod**: use "POST" as default, it will be used in `delete caches`.
    11. **diskStore**: custom disk storage.
 
