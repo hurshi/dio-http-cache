@@ -111,8 +111,8 @@ class DiskCacheStore extends ICacheStore {
   Future<CacheObj?> getCacheObj(String key, {String? subKey}) async {
     var db = await _database;
     if (null == db) return null;
-    var where = "$_columnKey=\"$key\"";
-    if (null != subKey) where += " and $_columnSubKey=\"$subKey\"";
+    var where = "$_columnKey='$key'";
+    if (null != subKey) where += " and $_columnSubKey='$subKey'";
     var resultList = await db.query(_tableCacheObject, where: where);
     if (resultList.isEmpty) return null;
     return await _decryptCacheObj(CacheObj.fromJson(resultList[0]));
@@ -143,8 +143,8 @@ class DiskCacheStore extends ICacheStore {
   Future<bool> delete(String key, {String? subKey}) async {
     var db = await _database;
     if (null == db) return false;
-    var where = "$_columnKey=\"$key\"";
-    if (null != subKey) where += " and $_columnSubKey=\"$subKey\"";
+    var where = "$_columnKey='$key'";
+    if (null != subKey) where += " and $_columnSubKey='$subKey'";
     return 0 != await db.delete(_tableCacheObject, where: where);
   }
 
