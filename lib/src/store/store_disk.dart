@@ -1,17 +1,12 @@
-import 'dart:io';
+import 'package:hive/hive.dart';
 
-import 'package:dio_http_cache/src/core/config.dart';
-import 'package:dio_http_cache/src/core/obj.dart';
-import 'package:dio_http_cache/src/store/store_impl.dart';
-import 'package:path/path.dart';
-import 'package:sqflite/sqflite.dart';
+import '../../dio_http_cache.dart';
 
 class DiskCacheStore extends ICacheStore {
   final String? _databasePath;
   final String _databaseName;
   final Encrypt? _encrypt;
   final Decrypt? _decrypt;
-  final String _tableCacheObject = "cache_dio";
   final String _columnKey = "key";
   final String _columnSubKey = "subKey";
   final String _columnMaxAgeDate = "max_age_date";
@@ -20,87 +15,19 @@ class DiskCacheStore extends ICacheStore {
   final String _columnStatusCode = "statusCode";
   final String _columnHeaders = "headers";
 
-  Database? _db;
-  static const int _curDBVersion = 3;
+  LazyBox<Map>? _db;
 
-  Future<Database?> get _database async {
+  Future<LazyBox<Map>?> get _database async {
     if (null == _db) {
       var path = _databasePath;
       if (null == path || path.length <= 0) {
-        path = await getDatabasesPath();
+        path = await PathHelper.getCurrentPath();
       }
-      await Directory(path).create(recursive: true);
-      path = join(path, "$_databaseName.db");
-      _db = await openDatabase(path,
-          version: _curDBVersion,
-          onConfigure: (db) => _tryFixDbNoVersionBug(db, path!),
-          onCreate: _onCreate,
-          onUpgrade: _onUpgrade);
-      await _clearExpired(_db);
+      // await Directory(path).create(recursive: true);
+      // path = join(path, "$_databaseName.hive");
+      _db = await Hive.openLazyBox<Map>(_databaseName, path: path);
     }
     return _db;
-  }
-
-  _tryFixDbNoVersionBug(Database db, String dbPath) async {
-    if ((await db.getVersion()) == 0) {
-      var isTableUserLogExist = await db
-          .rawQuery(
-              "select DISTINCT tbl_name from sqlite_master where tbl_name = '$_tableCacheObject'")
-          .then((v) => (v.length > 0));
-      if (isTableUserLogExist) {
-        await db.setVersion(1);
-      }
-    }
-  }
-
-  _getCreateTableSql() => '''
-      CREATE TABLE IF NOT EXISTS $_tableCacheObject ( 
-        $_columnKey text, 
-        $_columnSubKey text, 
-        $_columnMaxAgeDate integer,
-        $_columnMaxStaleDate integer,
-        $_columnContent BLOB,
-        $_columnStatusCode integer,
-        $_columnHeaders BLOB,
-        PRIMARY KEY ($_columnKey, $_columnSubKey)
-        ) 
-      ''';
-
-  _onCreate(Database db, int version) async {
-    await db.execute(_getCreateTableSql());
-  }
-
-  List<List<String>?> _dbUpgradeList() => [
-        // 0 -> 1
-        null,
-        // 1 -> 2
-        [
-          "ALTER TABLE $_tableCacheObject ADD COLUMN $_columnStatusCode integer;"
-        ],
-        // 2 -> 3 : Change $_columnContent from text to BLOB
-        ["DROP TABLE IF EXISTS $_tableCacheObject;", _getCreateTableSql()],
-      ];
-
-  _onUpgrade(Database db, int oldVersion, int newVersion) async {
-    var mergeLength = _dbUpgradeList().length;
-    if (oldVersion < 0 || oldVersion >= mergeLength) return;
-    await db.transaction((txn) async {
-      var tempVersion = oldVersion;
-      while (tempVersion < newVersion) {
-        if (tempVersion < mergeLength) {
-          var sqlList = _dbUpgradeList()[tempVersion];
-          if (null != sqlList && sqlList.length > 0) {
-            sqlList.forEach((sql) async {
-              sql = sql.trim();
-              if (sql.length > 0) {
-                await txn.execute(sql);
-              }
-            });
-          }
-        }
-        tempVersion++;
-      }
-    });
   }
 
   DiskCacheStore(
@@ -111,11 +38,11 @@ class DiskCacheStore extends ICacheStore {
   Future<CacheObj?> getCacheObj(String key, {String? subKey}) async {
     var db = await _database;
     if (null == db) return null;
-    var where = "$_columnKey=\"$key\"";
-    if (null != subKey) where += " and $_columnSubKey=\"$subKey\"";
-    var resultList = await db.query(_tableCacheObject, where: where);
-    if (resultList.isEmpty) return null;
-    return await _decryptCacheObj(CacheObj.fromJson(resultList[0]));
+    var dbKey = "$key.$subKey";
+    var data = await db.get(dbKey);
+    if (data == null) return null;
+    var result = data.cast<String, dynamic>();
+    return await _decryptCacheObj(CacheObj.fromJson(result));
   }
 
   @override
@@ -124,18 +51,18 @@ class DiskCacheStore extends ICacheStore {
     if (null == db) return false;
     var content = await _encryptCacheStr(obj.content);
     var headers = await _encryptCacheStr(obj.headers);
-    await db.insert(
-        _tableCacheObject,
-        {
-          _columnKey: obj.key,
-          _columnSubKey: obj.subKey ?? "",
-          _columnMaxAgeDate: obj.maxAgeDate ?? 0,
-          _columnMaxStaleDate: obj.maxStaleDate ?? 0,
-          _columnContent: content,
-          _columnStatusCode: obj.statusCode,
-          _columnHeaders: headers
-        },
-        conflictAlgorithm: ConflictAlgorithm.replace);
+
+    var dbKey = "${obj.key}.${obj.subKey}";
+
+    await db.put(dbKey, {
+      _columnKey: obj.key,
+      _columnSubKey: obj.subKey ?? "",
+      _columnMaxAgeDate: obj.maxAgeDate ?? 0,
+      _columnMaxStaleDate: obj.maxStaleDate ?? 0,
+      _columnContent: content,
+      _columnStatusCode: obj.statusCode,
+      _columnHeaders: headers
+    });
     return true;
   }
 
@@ -143,9 +70,9 @@ class DiskCacheStore extends ICacheStore {
   Future<bool> delete(String key, {String? subKey}) async {
     var db = await _database;
     if (null == db) return false;
-    var where = "$_columnKey=\"$key\"";
-    if (null != subKey) where += " and $_columnSubKey=\"$subKey\"";
-    return 0 != await db.delete(_tableCacheObject, where: where);
+    var dbKey = "$key.$subKey";
+    await db.delete(dbKey);
+    return true;
   }
 
   @override
@@ -154,20 +81,34 @@ class DiskCacheStore extends ICacheStore {
     return _clearExpired(db);
   }
 
-  Future<bool> _clearExpired(Database? db) async {
+  Future<bool> _clearExpired(LazyBox<Map>? db) async {
     if (null == db) return false;
     var now = DateTime.now().millisecondsSinceEpoch;
-    var where1 = "$_columnMaxStaleDate > 0 and $_columnMaxStaleDate < $now";
-    var where2 = "$_columnMaxStaleDate <= 0 and $_columnMaxAgeDate < $now";
-    return 0 !=
-        await db.delete(_tableCacheObject, where: "( $where1 ) or ( $where2 )");
+    for (var key in db.keys) {
+      var data = await db.get(key);
+      if (null == data) {
+        await db.delete(key);
+      } else {
+        var obj = CacheObj.fromJson(data.cast<String, dynamic>());
+        if ((obj.maxStaleDate != null &&
+                obj.maxStaleDate! > 0 &&
+                obj.maxStaleDate! < DateTime.now().millisecondsSinceEpoch) ||
+            (obj.maxStaleDate == null &&
+                obj.maxAgeDate != null &&
+                obj.maxAgeDate! < now)) {
+          await db.delete(key);
+        }
+      }
+    }
+    return true;
   }
 
   @override
   Future<bool> clearAll() async {
     var db = await _database;
     if (null == db) return false;
-    return 0 != await db.delete(_tableCacheObject);
+    await db.deleteAll(db.keys);
+    return true;
   }
 
   Future<CacheObj> _decryptCacheObj(CacheObj obj) async {

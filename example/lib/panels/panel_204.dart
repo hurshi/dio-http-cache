@@ -5,14 +5,16 @@ import '../dio_helper.dart';
 import 'helper.dart';
 
 class Post204Panel extends StatefulWidget {
+  const Post204Panel({super.key});
+
   @override
   State createState() => _Post204PanelState();
 }
 
 class _Post204PanelState extends State<Post204Panel> {
   Map<String, String> _content = {"Hello ~": ""};
-  var _url = "https://www.v2ex.com/generate_204";
-  var _urlController;
+  final _url = "https://www.v2ex.com/generate_204";
+  late TextEditingController _urlController;
 
   @override
   void initState() {
@@ -24,7 +26,7 @@ class _Post204PanelState extends State<Post204Panel> {
     setState(() => _content = {"Requesting": _url});
     DioHelper.getDio()
         .post(_urlController.text,
-            options: buildCacheOptions(Duration(hours: 1)))
+            options: buildCacheOptions(const Duration(hours: 1)))
         .then((response) => setState(
             () => _content = PanelHelper.getPrintContent(_url, null, response)))
         .catchError((onError, stackTrace) => setState(

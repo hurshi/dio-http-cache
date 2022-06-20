@@ -14,7 +14,7 @@ class PanelHelper {
       "Key":
           "${key.startsWith(RegExp(r'https?:')) ? '' : DioHelper.baseUrl}$key"
     };
-    if (null != subKey && subKey.length > 0) {
+    if (null != subKey && subKey.isNotEmpty) {
       result.addAll({"subKey": subKey});
     }
     if (null != response.headers.value(DIO_CACHE_HEADER_KEY_DATA_SOURCE)) {
@@ -41,13 +41,13 @@ class PanelHelper {
 
   static Widget buildNormalPanel(
       String title,
-      TextEditingController? _urlController,
-      TextEditingController? _paramsController,
+      TextEditingController? urlController,
+      TextEditingController? paramsController,
       Map<String, String?> txt,
       Function() request) {
     return Builder(
         builder: (context) => Padding(
-            padding: EdgeInsets.all(10),
+            padding: const EdgeInsets.all(10),
             child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: <Widget>[
@@ -58,10 +58,8 @@ class PanelHelper {
                           .copyWith(color: Theme.of(context).primaryColor)),
                   Container(height: 20),
                   Text("Base url:",
-                      style: Theme.of(context)
-                          .textTheme
-                          .subtitle2!
-                          .copyWith(color: Theme.of(context).accentColor)),
+                      style: Theme.of(context).textTheme.subtitle2!.copyWith(
+                          color: Theme.of(context).colorScheme.secondary)),
                   Text(DioHelper.baseUrl,
                       style: Theme.of(context)
                           .textTheme
@@ -69,12 +67,12 @@ class PanelHelper {
                           .copyWith(color: Colors.grey)),
                   for (var w in _buildInput(
                       context,
-                      _urlController,
+                      urlController,
                       "Request url",
-                      (null == _paramsController) ? request : null))
+                      (null == paramsController) ? request : null))
                     w,
                   for (var w in _buildInput(
-                      context, _paramsController, "Request params", request))
+                      context, paramsController, "Request params", request))
                     w,
                   Expanded(
                       child: SingleChildScrollView(
@@ -114,7 +112,7 @@ class PanelHelper {
           style: Theme.of(context)
               .textTheme
               .subtitle2!
-              .copyWith(color: Theme.of(context).accentColor)),
+              .copyWith(color: Theme.of(context).colorScheme.secondary)),
       Row(children: <Widget>[
         Expanded(child: TextField(controller: controller)),
         for (var w in _buildRequestButton(context, request)) w,
@@ -124,7 +122,7 @@ class PanelHelper {
 
   static List<Widget> _buildRequestButton(
       BuildContext context, Function()? request) {
-    if (null != request)
+    if (null != request) {
       return [
         Container(width: 10),
         FloatingActionButton(
@@ -135,6 +133,7 @@ class PanelHelper {
                     .copyWith(color: Colors.white)),
             onPressed: () => request())
       ];
+    }
     return [];
   }
 }

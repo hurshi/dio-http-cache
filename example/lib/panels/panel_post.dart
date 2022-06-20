@@ -5,15 +5,17 @@ import '../dio_helper.dart';
 import 'helper.dart';
 
 class PostPanel extends StatefulWidget {
+  const PostPanel({super.key});
+
   @override
   State createState() => _PostPanelState();
 }
 
 class _PostPanelState extends State<PostPanel> {
   Map<String, String?> _content = {"Hello ~": ""};
-  var _url = "article/query/0/json";
-  var _paramsController;
-  var _urlController;
+  final _url = "article/query/0/json";
+  late TextEditingController _paramsController;
+  late TextEditingController _urlController;
 
   @override
   void initState() {
@@ -24,12 +26,12 @@ class _PostPanelState extends State<PostPanel> {
 
   void _doRequest() {
     var params = _paramsController.text;
-    var paramsAvailable = null != params && params.length > 0;
+    var paramsAvailable = params.isNotEmpty;
     setState(() => _content = {"Requesting": params});
     DioHelper.getDio()
         .post(_urlController.text,
             data: paramsAvailable ? {'k': params} : {},
-            options: buildCacheOptions(Duration(hours: 1),
+            options: buildCacheOptions(const Duration(hours: 1),
                 subKey: paramsAvailable ? "k=$params" : null,
                 forceRefresh: false))
         .then((response) => setState(() =>

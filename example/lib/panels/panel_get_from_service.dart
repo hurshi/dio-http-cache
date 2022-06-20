@@ -5,15 +5,17 @@ import '../dio_helper.dart';
 import 'helper.dart';
 
 class PostGetLetServicePanel extends StatefulWidget {
+  const PostGetLetServicePanel({super.key});
+
   @override
   State createState() => _PostGetLetServicePanelState();
 }
 
 class _PostGetLetServicePanelState extends State<PostGetLetServicePanel> {
   Map<String, String> _content = {"Hello ~": ""};
-  var _url =
+  final _url =
       "https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Headers/Cache-Control";
-  var _urlController;
+  late TextEditingController _urlController;
 
   @override
   void initState() {

@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 import '../dio_helper.dart';
 
 class CacheManagerPanel extends StatefulWidget {
+  const CacheManagerPanel({super.key});
+
   @override
   State createState() => _CacheManagerPanelState();
 }
@@ -44,29 +46,25 @@ class MyDiskStore implements ICacheStore {
 
 class _CacheManagerPanelState extends State<CacheManagerPanel> {
   _Mode? _mode = _Mode.clearAll;
-  var _url = "article/query/0/json";
-  var _keyController = TextEditingController();
-  var _requestMethodController = TextEditingController();
-  var _subKeyController = TextEditingController();
+  final _url = "article/query/0/json";
+  final _keyController = TextEditingController();
+  final _requestMethodController = TextEditingController();
+  final _subKeyController = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
     return Padding(
-        padding: EdgeInsets.all(10),
+        padding: const EdgeInsets.all(10),
         child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
               Text("Cache Manager",
-                  style: Theme.of(context)
-                      .textTheme
-                      .headline6!
-                      .copyWith(color: Theme.of(context).accentColor)),
+                  style: Theme.of(context).textTheme.headline6!.copyWith(
+                      color: Theme.of(context).colorScheme.secondary)),
               Container(height: 50),
               Text("1. Choose mode:",
-                  style: Theme.of(context)
-                      .textTheme
-                      .subtitle2!
-                      .copyWith(color: Theme.of(context).accentColor)),
+                  style: Theme.of(context).textTheme.subtitle2!.copyWith(
+                      color: Theme.of(context).colorScheme.secondary)),
               DropdownButton<_Mode>(
                   value: _mode,
                   onChanged: (value) => setState(() => _mode = value),
@@ -87,12 +85,10 @@ class _CacheManagerPanelState extends State<CacheManagerPanel> {
               for (var w in getSubKeyViews(context)) w,
               Container(height: 20),
               Text("${getLabel()}. to clear",
-                  style: Theme.of(context)
-                      .textTheme
-                      .subtitle2!
-                      .copyWith(color: Theme.of(context).accentColor)),
+                  style: Theme.of(context).textTheme.subtitle2!.copyWith(
+                      color: Theme.of(context).colorScheme.secondary)),
               Padding(
-                  padding: EdgeInsets.all(10),
+                  padding: const EdgeInsets.all(10),
                   child: FloatingActionButton(
                       child: Text("Clear",
                           style: Theme.of(context)
@@ -104,7 +100,9 @@ class _CacheManagerPanelState extends State<CacheManagerPanel> {
   }
 
   void _clear() {
-    var resultPrinter = (result) => showSnackBar("缓存清理${result ? '成功' : '失败'}");
+    // ignore: prefer_function_declarations_over_variables
+    void Function(dynamic result) resultPrinter =
+        (result) => showSnackBar("缓存清理${result ? '成功' : '失败'}");
     if (_mode == _Mode.clearAll) {
       DioHelper.getCacheManager().clearAll().then(resultPrinter);
     } else if (_mode == _Mode.clearByKey) {
@@ -133,7 +131,7 @@ class _CacheManagerPanelState extends State<CacheManagerPanel> {
           style: Theme.of(context)
               .textTheme
               .subtitle2!
-              .copyWith(color: Theme.of(context).accentColor)),
+              .copyWith(color: Theme.of(context).colorScheme.secondary)),
       TextField(
           controller: _requestMethodController,
           style: Theme.of(context).textTheme.bodyText1),
@@ -149,7 +147,7 @@ class _CacheManagerPanelState extends State<CacheManagerPanel> {
           style: Theme.of(context)
               .textTheme
               .subtitle2!
-              .copyWith(color: Theme.of(context).accentColor)),
+              .copyWith(color: Theme.of(context).colorScheme.secondary)),
       TextField(
           controller: _keyController,
           style: Theme.of(context).textTheme.bodyText1),
@@ -165,7 +163,7 @@ class _CacheManagerPanelState extends State<CacheManagerPanel> {
           style: Theme.of(context)
               .textTheme
               .subtitle2!
-              .copyWith(color: Theme.of(context).accentColor)),
+              .copyWith(color: Theme.of(context).colorScheme.secondary)),
       TextField(
           controller: _subKeyController,
           style: Theme.of(context).textTheme.bodyText1),
@@ -174,20 +172,22 @@ class _CacheManagerPanelState extends State<CacheManagerPanel> {
   }
 
   String getLabel() {
-    if (_mode == _Mode.clearAll)
+    if (_mode == _Mode.clearAll) {
       return "2";
-    else if (_mode == _Mode.clearByKey)
+    } else if (_mode == _Mode.clearByKey) {
       return "4";
-    else
+    } else {
       return "5";
+    }
   }
 
   String getTxtByMode(_Mode mode) {
-    if (mode == _Mode.clearAll)
+    if (mode == _Mode.clearAll) {
       return "Clear All";
-    else if (mode == _Mode.clearByKey)
+    } else if (mode == _Mode.clearByKey) {
       return "Clear by Key";
-    else
+    } else {
       return "Clear By Key and SubKey";
+    }
   }
 }

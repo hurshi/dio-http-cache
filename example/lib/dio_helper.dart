@@ -7,29 +7,26 @@ import 'package:dio_http_cache/dio_http_cache.dart';
 class DioHelper {
   static Dio? _dio;
   static DioCacheManager? _manager;
-  static final baseUrl = "https://www.wanandroid.com/";
+  static const baseUrl = "https://www.wanandroid.com/";
 
   static Dio getDio() {
-    if (null == _dio) {
-      _dio = Dio(BaseOptions(
-          baseUrl: baseUrl,
-          contentType: "application/x-www-form-urlencoded; charset=utf-8"))
+    _dio ??= Dio(BaseOptions(
+        baseUrl: baseUrl,
+        contentType: "application/x-www-form-urlencoded; charset=utf-8"))
 //        ..httpClientAdapter = _getHttpClientAdapter()
-        ..interceptors.add(getCacheManager().interceptor)
-        ..interceptors.add(LogInterceptor(responseBody: true));
-    }
+      ..interceptors.add(getCacheManager().interceptor)
+      ..interceptors.add(LogInterceptor(responseBody: true));
     return _dio!;
   }
 
   static DioCacheManager getCacheManager() {
-    if (null == _manager) {
-      _manager =
-          DioCacheManager(CacheConfig(baseUrl: "https://www.wanandroid.com/"));
-    }
+    _manager ??= DioCacheManager(CacheConfig(
+        baseUrl: "https://www.wanandroid.com/", skipMemoryCache: true));
     return _manager!;
   }
 
   // set proxy
+  // ignore: unused_element
   static DefaultHttpClientAdapter _getHttpClientAdapter() {
     DefaultHttpClientAdapter httpClientAdapter;
     httpClientAdapter = DefaultHttpClientAdapter();
@@ -41,6 +38,7 @@ class DioHelper {
           (X509Certificate cert, String host, int port) {
         return true;
       };
+      return client;
     };
     return httpClientAdapter;
   }

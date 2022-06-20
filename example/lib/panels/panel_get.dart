@@ -5,14 +5,16 @@ import '../dio_helper.dart';
 import 'helper.dart';
 
 class GetPanel extends StatefulWidget {
+  const GetPanel({super.key});
+
   @override
   State createState() => _GetPanelState();
 }
 
 class _GetPanelState extends State<GetPanel> {
   Map<String, String> _content = {"Hello ~": ""};
-  var _url = "https://www.baidu.com";
-  var _urlController;
+  final _url = "https://www.baidu.com";
+  late TextEditingController _urlController;
 
   @override
   void initState() {
@@ -24,7 +26,8 @@ class _GetPanelState extends State<GetPanel> {
     setState(() => _content = {"Requesting": _url});
     DioHelper.getDio()
         .get(_urlController.text,
-            options: buildCacheOptions(Duration(hours: 1), forceRefresh: false))
+            options: buildCacheOptions(const Duration(hours: 1),
+                forceRefresh: false))
         .then((response) => setState(
             () => _content = PanelHelper.getPrintContent(_url, null, response)))
         .catchError((onError, stackTrace) => setState(
