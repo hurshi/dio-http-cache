@@ -100,7 +100,7 @@ dependencies:
       _dioCacheManager.deleteByPrimaryKeyAndSubKey(path, requestMethod: "GET"); 
       ```
 
-      **INPORTANT:** If you have additional parameters when requesting the http interface, you must take them with it, for example:
+      **IMPORTANT:** If you have additional parameters when requesting the http interface, you must take them with it, for example:
 
       ```dart
       _dio.get(_url, queryParameters: {'k': keyword}, 
