@@ -5,6 +5,7 @@ import 'package:dio/dio.dart';
 import 'package:dio_http_cache/src/core/config.dart';
 import 'package:dio_http_cache/src/core/manager.dart';
 import 'package:dio_http_cache/src/core/obj.dart';
+import 'package:flutter/foundation.dart';
 
 const DIO_CACHE_KEY_TRY_CACHE = "dio_cache_try_cache";
 const DIO_CACHE_KEY_MAX_AGE = "dio_cache_max_age";
@@ -38,6 +39,31 @@ class DioCacheManager {
     return _interceptor;
   }
 
+  ///获取缓存方法
+  Future<Map?> getCacheWithUrl({required String url, String method = "GET", Map? params, dynamic data}) async {
+    if (params != null) {
+      var query = Transformer.urlEncodeMap(params, ListFormat.multi);
+      url += "?$query";
+    }
+    Uri _uri = Uri.parse(url);
+    // Uri _uri = Uri.http(url, unencodedPath)
+    String primaryKey = _getPrimaryKeyFromUri(_uri);
+    String key = "$method-$primaryKey";
+    // GET-134.175.182.139/app/city/440100/top-submitter
+    String subKey = _getSubKeyFromUri(_uri, data: data ?? null);
+    CacheObj? _obj = await _manager.pullFromCacheBeforeMaxAge(key, subKey: subKey);
+    if (null != _obj) {
+      dynamic data = _obj.content;
+      data = jsonDecode(utf8.decode(data));
+      debugPrint("\ngetCacheWithUrl, url: $url,\nkey:$key, subKey:$subKey \ndata: $data");
+      // return _buildResponse(_obj, _obj.statusCode, options);
+      return data;
+    } else {
+      debugPrint("\ngetCacheWithUrl, url: $url,\nkey: $key, subKey: $subKey \ndata: null");
+      return null;
+    }
+  }
+
   _onRequest(RequestOptions options, RequestInterceptorHandler handler) async {
     if ((options.extra[DIO_CACHE_KEY_TRY_CACHE] ?? false) != true) {
       return handler.next(options);
@@ -47,17 +73,14 @@ class DioCacheManager {
     }
     var responseDataFromCache = await _pullFromCacheBeforeMaxAge(options);
     if (null != responseDataFromCache) {
-      return handler.resolve(
-          _buildResponse(
-              responseDataFromCache, responseDataFromCache.statusCode, options),
-          true);
+      return handler.resolve(_buildResponse(
+          responseDataFromCache, responseDataFromCache.statusCode, options), true);
     }
     return handler.next(options);
   }
 
   _onResponse(Response response, ResponseInterceptorHandler handler) async {
-    if ((response.requestOptions.extra[DIO_CACHE_KEY_TRY_CACHE] ?? false) ==
-            true &&
+    if ((response.requestOptions.extra[DIO_CACHE_KEY_TRY_CACHE] ?? false) == true &&
         response.statusCode != null &&
         response.statusCode! >= 200 &&
         response.statusCode! < 300) {
@@ -68,8 +91,7 @@ class DioCacheManager {
 
   _onError(DioError e, ErrorInterceptorHandler handler) async {
     if ((e.requestOptions.extra[DIO_CACHE_KEY_TRY_CACHE] ?? false) == true) {
-      var responseDataFromCache =
-          await _pullFromCacheBeforeMaxStale(e.requestOptions);
+      var responseDataFromCache = await _pullFromCacheBeforeMaxStale(e.requestOptions);
       if (null != responseDataFromCache) {
         var response = _buildResponse(responseDataFromCache,
             responseDataFromCache.statusCode, e.requestOptions);
@@ -101,8 +123,7 @@ class DioCacheManager {
     return Response(
         data: data,
         headers: headers,
-        requestOptions: options.copyWith(
-            extra: options.extra..remove(DIO_CACHE_KEY_TRY_CACHE)),
+        requestOptions: options.copyWith(extra: options.extra..remove(DIO_CACHE_KEY_TRY_CACHE)),
         statusCode: statusCode ?? 200);
   }
 
@@ -152,10 +173,8 @@ class DioCacheManager {
       // try to get maxAge and maxStale from cacheControl
       Map<String, String?> parameters;
       try {
-        parameters = HeaderValue.parse(
-                "${HttpHeaders.cacheControlHeader}: $cacheControl",
-                parameterSeparator: ",",
-                valueSeparator: "=")
+        parameters = HeaderValue.parse("${HttpHeaders.cacheControlHeader}: $cacheControl",
+                parameterSeparator: ",", valueSeparator: "=")
             .parameters;
         _maxAge = _tryGetDurationFromMap(parameters, "s-maxage");
         if (null == _maxAge) {
@@ -186,8 +205,7 @@ class DioCacheManager {
     callback(_maxAge, maxStale);
   }
 
-  Duration? _tryGetDurationFromMap(
-      Map<String, String?> parameters, String key) {
+  Duration? _tryGetDurationFromMap(Map<String, String?> parameters, String key) {
     if (parameters.containsKey(key)) {
       var value = int.tryParse(parameters[key]!);
       if (null != value && value >= 0) {
