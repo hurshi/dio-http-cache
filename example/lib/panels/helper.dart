@@ -1,6 +1,6 @@
 import 'dart:convert';
 
-import 'package:dio/dio.dart';
+import 'package:diox/diox.dart';
 import 'package:dio_http_cache/dio_http_cache.dart';
 import 'package:flutter/material.dart';
 
@@ -54,16 +54,16 @@ class PanelHelper {
                   Text("NOTE: $title",
                       style: Theme.of(context)
                           .textTheme
-                          .subtitle2!
+                          .titleSmall!
                           .copyWith(color: Theme.of(context).primaryColor)),
                   Container(height: 20),
                   Text("Base url:",
-                      style: Theme.of(context).textTheme.subtitle2!.copyWith(
+                      style: Theme.of(context).textTheme.titleSmall!.copyWith(
                           color: Theme.of(context).colorScheme.secondary)),
                   Text(DioHelper.baseUrl,
                       style: Theme.of(context)
                           .textTheme
-                          .bodyText2!
+                          .bodyMedium!
                           .copyWith(color: Colors.grey)),
                   for (var w in _buildInput(
                       context,
@@ -91,13 +91,13 @@ class PanelHelper {
           text: "$k: ",
           style: Theme.of(context)
               .textTheme
-              .subtitle2!
+              .titleSmall!
               .copyWith(color: Colors.teal)));
       widgets.add(TextSpan(
           text: "$v\n\n",
           style: Theme.of(context)
               .textTheme
-              .bodyText2!
+              .bodyMedium!
               .copyWith(color: Theme.of(context).disabledColor)));
     });
     return widgets;
@@ -111,7 +111,7 @@ class PanelHelper {
       Text("$title:",
           style: Theme.of(context)
               .textTheme
-              .subtitle2!
+              .titleSmall!
               .copyWith(color: Theme.of(context).colorScheme.secondary)),
       Row(children: <Widget>[
         Expanded(child: TextField(controller: controller)),
@@ -129,7 +129,7 @@ class PanelHelper {
             child: Text("GO",
                 style: Theme.of(context)
                     .textTheme
-                    .subtitle2!
+                    .titleSmall!
                     .copyWith(color: Colors.white)),
             onPressed: () => request())
       ];

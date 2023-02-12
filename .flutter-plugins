@@ -1,7 +1,6 @@
 # This is a generated file; do not edit or check into version control.
-path_provider=/Library/Development/flutter/.pub-cache/hosted/pub.dartlang.org/path_provider-2.0.11/
-path_provider_android=/Library/Development/flutter/.pub-cache/hosted/pub.dartlang.org/path_provider_android-2.0.15/
-path_provider_ios=/Library/Development/flutter/.pub-cache/hosted/pub.dartlang.org/path_provider_ios-2.0.10/
-path_provider_linux=/Library/Development/flutter/.pub-cache/hosted/pub.dartlang.org/path_provider_linux-2.1.7/
-path_provider_macos=/Library/Development/flutter/.pub-cache/hosted/pub.dartlang.org/path_provider_macos-2.0.6/
-path_provider_windows=/Library/Development/flutter/.pub-cache/hosted/pub.dartlang.org/path_provider_windows-2.1.0/
+path_provider=/Users/cagatayyildirim/.pub-cache/hosted/pub.dev/path_provider-2.0.12/
+path_provider_android=/Users/cagatayyildirim/.pub-cache/hosted/pub.dev/path_provider_android-2.0.22/
+path_provider_foundation=/Users/cagatayyildirim/.pub-cache/hosted/pub.dev/path_provider_foundation-2.1.1/
+path_provider_linux=/Users/cagatayyildirim/.pub-cache/hosted/pub.dev/path_provider_linux-2.1.8/
+path_provider_windows=/Users/cagatayyildirim/.pub-cache/hosted/pub.dev/path_provider_windows-2.1.3/

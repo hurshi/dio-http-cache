@@ -1,8 +1,8 @@
 import 'dart:io';
 
-import 'package:dio/adapter.dart';
-import 'package:dio/dio.dart';
+import 'package:diox/diox.dart';
 import 'package:dio_http_cache/dio_http_cache.dart';
+import 'package:diox/io.dart';
 
 class DioHelper {
   static Dio? _dio;
@@ -27,9 +27,9 @@ class DioHelper {
 
   // set proxy
   // ignore: unused_element
-  static DefaultHttpClientAdapter _getHttpClientAdapter() {
-    DefaultHttpClientAdapter httpClientAdapter;
-    httpClientAdapter = DefaultHttpClientAdapter();
+  static IOHttpClientAdapter _getHttpClientAdapter() {
+    IOHttpClientAdapter httpClientAdapter;
+    httpClientAdapter = IOHttpClientAdapter();
     httpClientAdapter.onHttpClientCreate = (HttpClient client) {
       client.findProxy = (uri) {
         return 'PROXY 10.0.0.103:6152';
