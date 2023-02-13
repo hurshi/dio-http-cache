@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:diox/diox.dart';
+import 'package:dio/dio.dart';
 import 'package:dio_http_cache/src/core/config.dart';
 import 'package:dio_http_cache/src/core/manager.dart';
 import 'package:dio_http_cache/src/core/obj.dart';

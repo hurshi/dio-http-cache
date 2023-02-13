@@ -1,4 +1,4 @@
-import 'package:diox/diox.dart';
+import 'package:dio/dio.dart';
 import 'package:dio_http_cache/src/manager_dio.dart';
 
 /// try to get maxAge and maxStale from response headers.

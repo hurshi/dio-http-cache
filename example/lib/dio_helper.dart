@@ -1,8 +1,8 @@
 import 'dart:io';
 
-import 'package:diox/diox.dart';
+import 'package:dio/dio.dart';
 import 'package:dio_http_cache/dio_http_cache.dart';
-import 'package:diox/io.dart';
+import 'package:dio/io.dart';
 
 class DioHelper {
   static Dio? _dio;
