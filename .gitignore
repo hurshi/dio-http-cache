@@ -16,3 +16,7 @@ doc/api/
 *.iml
 pubspec.lock
 .DS_Store
+.flutter-plugins
+.flutter-plugins-dependencies
+example/.flutter-plugins-dependencies
+example/ios/Flutter/flutter_export_environment.sh

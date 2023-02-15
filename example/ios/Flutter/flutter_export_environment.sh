@@ -1,9 +1,9 @@
 #!/bin/sh
 # This is a generated file; do not edit or check into version control.
-export "FLUTTER_ROOT=/Library/Development/flutter"
-export "FLUTTER_APPLICATION_PATH=/Users/cagatayyildirim/Documents/Repos_Local/core/external_packages/dio-http-cache/example"
+export "FLUTTER_ROOT=C:\Users\yildi\Documents\flutter"
+export "FLUTTER_APPLICATION_PATH=C:\Shared\Repos\Flutter\core\external_packages\dio-http-cache\example"
 export "COCOAPODS_PARALLEL_CODE_SIGN=true"
-export "FLUTTER_TARGET=lib/main.dart"
+export "FLUTTER_TARGET=lib\main.dart"
 export "FLUTTER_BUILD_DIR=build"
 export "FLUTTER_BUILD_NAME=1.0.0"
 export "FLUTTER_BUILD_NUMBER=1"
