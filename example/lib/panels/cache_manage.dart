@@ -15,31 +15,26 @@ enum _Mode { clearByKey, clearByKeyAndSubKey, clearAll }
 class MyDiskStore implements ICacheStore {
   @override
   Future<bool> clearAll() {
-    // TODO: implement clearAll
     throw UnimplementedError();
   }
 
   @override
   Future<bool> clearExpired() {
-    // TODO: implement clearExpired
     throw UnimplementedError();
   }
 
   @override
   Future<bool> delete(String key, {String? subKey}) {
-    // TODO: implement delete
     throw UnimplementedError();
   }
 
   @override
   Future<CacheObj> getCacheObj(String key, {String? subKey}) {
-    // TODO: implement getCacheObj
     throw UnimplementedError();
   }
 
   @override
   Future<bool> setCacheObj(CacheObj obj) {
-    // TODO: implement setCacheObj
     throw UnimplementedError();
   }
 }
