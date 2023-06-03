@@ -4,6 +4,8 @@
 
 [中文介绍](./README_zh.md)
 
+!!!Cagatay There was not original support for this package.When dio package has offical support use that.This is only upgrade for dio package
+
 Dio-http-cache is a cache library for [Dio ( http client for flutter )](https://github.com/flutterchina/dio), like [Rxcache](https://github.com/VictorAlbertos/RxCache) in Android.
 
 Dio-http-cache uses [sqflite](https://github.com/tekartik/sqflite) as  disk cache, and  [LRU](https://github.com/google/quiver-dart) strategy as memory cache.

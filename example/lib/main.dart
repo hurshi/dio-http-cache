@@ -1,3 +1,5 @@
+// ignore_for_file: constant_identifier_names
+
 import 'package:flutter/material.dart';
 
 import 'panels/cache_manage.dart';
@@ -8,24 +10,27 @@ import 'panels/panel_get_from_service.dart';
 import 'panels/panel_post.dart';
 import 'tuple.dart';
 
-void main() => runApp(MyApp());
+void main() => runApp(const MyApp());
 
 class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
   @override
   Widget build(BuildContext context) {
-    final title = "DioHttpCache Example";
+    const title = "DioHttpCache Example";
     return MaterialApp(
         title: title,
         theme: ThemeData(primarySwatch: Colors.blue),
-        home: MyHomePage(title: title));
+        home: const MyHomePage(title: title));
   }
 }
 
 class MyHomePage extends StatefulWidget {
-  MyHomePage({Key? key, this.title}) : super(key: key);
+  const MyHomePage({Key? key, this.title}) : super(key: key);
   final String? title;
 
   @override
+  // ignore: library_private_types_in_public_api
   _MyHomePageState createState() => _MyHomePageState();
 }
 
@@ -46,17 +51,17 @@ class _MyHomePageState extends State<MyHomePage> {
   Widget? getPanel() {
     switch (panel) {
       case Panel.CACHE_MANAGER:
-        return CacheManagerPanel();
+        return const CacheManagerPanel();
       case Panel.GET:
-        return GetPanel();
+        return const GetPanel();
       case Panel.POST:
-        return PostPanel();
+        return const PostPanel();
       case Panel.POST_204:
-        return Post204Panel();
+        return const Post204Panel();
       case Panel.GET_FROM_SERVICE:
-        return PostGetLetServicePanel();
+        return const PostGetLetServicePanel();
       case Panel.GET_BYTES:
-        return GetBytesPanel();
+        return const GetBytesPanel();
     }
   }
 
@@ -72,7 +77,7 @@ class _MyHomePageState extends State<MyHomePage> {
     ];
     return PopupMenuButton<Pair<String, Function()>>(
         onSelected: (p) => p.i1!(),
-        child: Padding(
+        child: const Padding(
             padding: EdgeInsets.all(10),
             child: Icon(Icons.menu, color: Colors.white)),
         itemBuilder: (BuildContext context) => choices

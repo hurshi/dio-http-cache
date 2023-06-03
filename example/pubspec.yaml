@@ -4,15 +4,17 @@ version: 1.0.0+1
 publish_to: none
 
 environment:
-  sdk: '>=2.12.0 <3.0.0'
+  sdk: '>=3.0.0-290.1.beta <4.0.0'
 
 dependencies:
   flutter:
     sdk: flutter
   dio_http_cache:
     path: ../
+  dio: ^5.0.0
 
 dev_dependencies:
+  flutter_lints: ^2.0.1
   flutter_test:
     sdk: flutter
 

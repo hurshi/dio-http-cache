@@ -6,15 +6,17 @@ import '../dio_helper.dart';
 import 'helper.dart';
 
 class GetBytesPanel extends StatefulWidget {
+  const GetBytesPanel({super.key});
+
   @override
   State createState() => _GetBytesPanelState();
 }
 
 class _GetBytesPanelState extends State<GetBytesPanel> {
   Map<String, String> _content = {"Hello ~": ""};
-  var _url =
+  final _url =
       "https://ss0.baidu.com/6ONWsjip0QIZ8tyhnq/it/u=1731248121,277041329&fm=58&s=0DE6CD13D1A06D015651B0D6000080B1&bpow=121&bpoh=75";
-  var _urlController;
+  late TextEditingController _urlController;
 
   @override
   void initState() {
@@ -26,7 +28,7 @@ class _GetBytesPanelState extends State<GetBytesPanel> {
     setState(() => _content = {"Requesting": _url});
     DioHelper.getDio()
         .get(_urlController.text,
-            options: buildCacheOptions(Duration(hours: 1),
+            options: buildCacheOptions(const Duration(hours: 1),
                 forceRefresh: false,
                 options: Options(responseType: ResponseType.bytes)))
         .then((response) => setState(
